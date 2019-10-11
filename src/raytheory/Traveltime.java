@@ -17,7 +17,7 @@ import topoModel.Seismic3Dmodel;
 
 public class Traveltime {
 	
-	private Set<RaypathInformation> raypathInformations;
+	private List<RaypathInformation> raypathInformations;
 	
 	private String modelName;
 	
@@ -67,7 +67,7 @@ public class Traveltime {
 //		}
 //	}
 	
-	public Traveltime(Set<RaypathInformation> raypathInformations, String modelName, Seismic3Dmodel seismic3Dmodel, String phaseList) {
+	public Traveltime(List<RaypathInformation> raypathInformations, String modelName, Seismic3Dmodel seismic3Dmodel, String phaseList) {
 		this.raypathInformations = raypathInformations;
 		this.modelName = modelName;
 		this.phaseList = phaseList;
@@ -139,6 +139,9 @@ public class Traveltime {
 				if (addPoint)
 					thisRecordList.add(new Measurement(raypathInformation.getStation(), raypathInformation.getEvent()
 							, phaseName, scatterPointMap.get(phaseName), traveltimes));
+				else
+					thisRecordList.add(new Measurement(raypathInformation.getStation(), raypathInformation.getEvent()
+							, phaseName, scatterPointMap.get(phaseName), new double[] {Double.NaN, Double.NaN, Double.NaN}));
 			}
 			measurements.add(thisRecordList);
 		

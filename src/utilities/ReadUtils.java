@@ -90,4 +90,31 @@ public class ReadUtils {
 		}
 		return coeffs;
 	}
+	
+	public static List<List<Double>> readSphFile_specfem(InputStream is) {
+		BufferedReader bufferedReader = 
+	            new BufferedReader(new InputStreamReader(is));
+		double lmax = 0;
+		List<Double> tmps = new ArrayList<>();
+		try {
+			lmax = Double.parseDouble(bufferedReader.readLine().trim());
+			String line = "";
+			while((line = bufferedReader.readLine()) != null) {
+				Arrays.stream(line.trim().split(" ")).forEach(s -> tmps.add(Double.parseDouble(s)));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		List<List<Double>> coeffs = new ArrayList<>();
+		int count = 0;
+		for (int l = 0; l < lmax + 1; l++) {
+			List<Double> cs = new ArrayList<Double>();
+			for (int m = 0; m < 2*l+1; m++) {
+				cs.add(tmps.get(count));
+				count++;
+			}
+			coeffs.add(cs);
+		}
+		return coeffs;
+	}
 }

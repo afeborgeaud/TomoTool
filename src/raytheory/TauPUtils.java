@@ -208,8 +208,17 @@ public class TauPUtils {
 		default:
 			throw new RuntimeException(phaseName + " phase not implemented yet");
 		}
-		if (scatterList.size() > 0)
-			scatterPointMap.put(phaseName, scatterList);
+		if (scatterList.size() > 0) {
+			String shortPhaseName = toPhaseName(phaseName);
+			scatterPointMap.put(shortPhaseName, scatterList);
+		}
+	}
+	
+	private String toPhaseName(String puristPhaseName) {
+		if (puristPhaseName.endsWith("m"))
+			return puristPhaseName.substring(0, puristPhaseName.length() - 1);
+		else
+			return puristPhaseName;
 	}
 	
 	public void processRaypath(TimeDist[] pathPoints, HorizontalPosition staPos, String phaseName) {
@@ -227,7 +236,8 @@ public class TauPUtils {
 //		path[path.length - 1] = staPos.toLocation(6371.);
 		
 //		System.out.println(staPos + " " + );
-		raypathMap.put(phaseName, path);
+		String shortPhaseName = toPhaseName(phaseName);
+		raypathMap.put(shortPhaseName, path);
 	}
 	
 	public Map<String, List<ScatterPoint>> getScatterPointMap() {
