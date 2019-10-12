@@ -84,7 +84,15 @@ public class CrossCorrelationTimeshift {
 				double amplitudeRatio = shiftObsTrace.getYVector().getLInfNorm() / synTrace.getYVector().getLInfNorm();
 				double crosscorrelationAtBestShift = crossCorrelation(synTrace, shiftObsTrace);
 				
-				timeshifts.add(new Measurement(timewindows.get(i), timeshift, amplitudeRatio, crosscorrelationAtBestShift));
+				// compare with energy 15 s before and after the phase of interest
+				Trace traceBefore = obsNames.get(i).read().createTrace().cutWindow(shiftObsTrace.getXAt(0) - 5, shiftObsTrace.getXAt(0));
+				Trace traceAfter = obsNames.get(i).read().createTrace().cutWindow(shiftObsTrace.getXAt(shiftObsTrace.getLength() - 1), shiftObsTrace.getXAt(shiftObsTrace.getLength() - 1) + 5);
+				double snBefore = shiftObsTrace.getYVector().getNorm() / (shiftObsTrace.getXAt(shiftObsTrace.getLength() - 1) - shiftObsTrace.getXAt(0))
+						/ (traceBefore.getYVector().getNorm() / 5.);
+				double snAfter = shiftObsTrace.getYVector().getNorm() / (shiftObsTrace.getXAt(shiftObsTrace.getLength() - 1) - shiftObsTrace.getXAt(0))
+						/ (traceAfter.getYVector().getNorm() / 5.);
+				
+				timeshifts.add(new Measurement(timewindows.get(i), timeshift, amplitudeRatio, crosscorrelationAtBestShift, snBefore, snAfter));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -192,7 +200,7 @@ public class CrossCorrelationTimeshift {
 	public static void compute_phase(List<TimewindowInformation> timewindows, String modelRefName, String modelName, String phaseName) {
 		String modelSyn = modelRefName;
 		String modelObs = modelName;
-		Path workDir = Paths.get("/work/anselme/TOPO/ETH_local/synthetics");
+		Path workDir = Paths.get("~/Dropbox/topo_eth_local/synthetics");
 		Path obsPath = workDir.resolve(modelObs);
 		Path synPath = workDir.resolve(modelSyn);
 		boolean convolute = true;
@@ -215,6 +223,7 @@ public class CrossCorrelationTimeshift {
 				ScatterPoint point = mRay.getScatterPointList().get(0);
 				pw.println(mRay.getTraveltimePerturbation() + " " + -m.getTimeshift() 
 					+ " " + m.getAmplitudeRatio() + " " + m.getCrosscorrelationAtBestShift()
+					+ " " + m.getSn0() + " " + m.getSn1() + " " + mRay.getEpicentralDistance()
 					+ " " + point.getPosition() + mRay.getPhaseName() + " " + mRay.getStation().getStationName() + " " + mRay.getGlobalCMTID());
 			}
 			pw.close();
