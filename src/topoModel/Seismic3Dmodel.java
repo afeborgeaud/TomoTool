@@ -25,4 +25,6 @@ public interface Seismic3Dmodel {
 	
 	public void outputLayer(Path outputpath, double r) throws IOException;
 	
+	public String getName();
+	
 }

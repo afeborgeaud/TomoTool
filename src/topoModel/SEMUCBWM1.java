@@ -201,4 +201,9 @@ public class SEMUCBWM1 implements Seismic3Dmodel {
 		pw.close();
 	}
 	
+	@Override
+	public String getName() {
+		return "semucbwm1";
+	}
+	
 }

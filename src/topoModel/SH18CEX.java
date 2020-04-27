@@ -78,4 +78,9 @@ public class SH18CEX implements Seismic3Dmodel {
 	public void outputLayer(Path outputpath, double r) throws IOException {
 		
 	}
+	
+	@Override
+	public String getName() {
+		return "sh18cex";
+	}
 }

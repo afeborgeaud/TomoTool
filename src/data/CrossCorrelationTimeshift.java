@@ -19,11 +19,13 @@ import org.apache.commons.math3.linear.RealVector;
 
 import io.github.kensuke1984.kibrary.timewindow.TimewindowInformation;
 import io.github.kensuke1984.kibrary.timewindow.TimewindowInformationFile;
+import io.github.kensuke1984.kibrary.util.HorizontalPosition;
 import io.github.kensuke1984.kibrary.util.Trace;
 import io.github.kensuke1984.kibrary.util.sac.SACFileName;
 import math.Interpolate;
 import raytheory.Compute;
 import raytheory.ScatterPoint;
+import topoModel.GaussianPointPerturbation;
 import topoModel.Seismic3Dmodel;
 import topoModel.TK10;
 
@@ -41,13 +43,49 @@ public class CrossCorrelationTimeshift {
 //		computePKKKP();
 //		computeScS();
 		
-		Path timewindowPath = Paths.get(args[0]);
-		String phaseName = args[1].trim();
-		String modelRefName = args[2].trim();
-		String modelName = args[3].trim();
-		System.out.println(String.format("Windows: %s, Phase: %s, ModelRef: %s, Model: %s", timewindowPath.getFileName(), phaseName, modelRefName, modelName));
-		List<TimewindowInformation> timewindows = TimewindowInformationFile.read(timewindowPath).stream().collect(Collectors.toList());
-		compute_phase(timewindows, modelRefName, modelName, phaseName);
+		if (args.length == 4) {
+			Path timewindowPath = Paths.get(args[0]);
+			String phaseName = args[1].trim();
+			String modelRefName = args[2].trim();
+			String modelName = args[3].trim();
+			System.out.println(String.format("Windows: %s, Phase: %s, ModelRef: %s, Model: %s", timewindowPath.getFileName(), phaseName, modelRefName, modelName));
+			
+			double timeBeforePeak = 20;
+			double timeAfterPeak = 20;
+			double minCc = 0.95;
+//			minCc = 0.8;
+//			minCc = 0.85;
+			minCc = -1;
+			
+//			List<TimewindowInformation> timewindows = readAndAlignTimewindows(timewindowPath, modelRefName, Paths.get(modelRefName),
+//					timeBeforePeak, timeAfterPeak, minCc);
+			
+			List<TimewindowInformation> timewindows = TimewindowInformationFile.read(timewindowPath).stream().collect(Collectors.toList());
+			
+//			WaveformClustering clustering = new WaveformClustering(timewindows, Paths.get(modelRefName), 0.02);
+//			clustering.run();
+//			List<TimewindowInformation> timewindowsForLargestCluster = clustering.getIndicesOfLargestCluster().stream().map(i -> timewindows.get(i)).collect(Collectors.toList());
+//			System.out.println(timewindowsForLargestCluster.size() + "/" + timewindows.size() +
+//				String.format(" (%.2f%%)", (double) timewindowsForLargestCluster.size() / timewindows.size() * 100));
+			
+//			clustering.displayResultInRecordSection();
+			
+			System.err.println("Going with " + timewindows.size() + " windows (after selection)");
+			
+//			compute_phase(timewindowsForLargestCluster, modelRefName, modelName, phaseName);
+			compute_phase(timewindows, modelRefName, modelName, phaseName);
+		}
+		else if (args.length == 3) {
+			Path timewindowPath = Paths.get(args[0]);
+			String modelRefName = args[1].trim();
+			String modelName = args[2].trim();
+			System.out.println(String.format("Windows: %s, ModelRef: %s, Model: %s", timewindowPath.getFileName(), modelRefName, modelName));
+			
+			List<TimewindowInformation> timewindows = TimewindowInformationFile.read(timewindowPath).stream().collect(Collectors.toList());
+			
+			compute_windows(timewindows, modelRefName, modelName);
+		}
+		
 	}
 	
 	public CrossCorrelationTimeshift(List<TimewindowInformation> timewindows, Path obsPath, Path synPath, boolean convolute) {
@@ -75,22 +113,24 @@ public class CrossCorrelationTimeshift {
 						.cutWindow(timewindows.get(i).getStartTime() - 5, timewindows.get(i).getEndTime() + 5);
 				Trace synTrace = synNames.get(i).read().createTrace().cutWindow(timewindows.get(i));
 				
-				obsTrace = interpolate(obsTrace, 50);
+				obsTrace = interpolate(obsTrace, 50); //50
 				synTrace = interpolate(synTrace, 50);
 				
-				double timeshift = obsTrace.findBestShift(synTrace);
+				double timeshift = obsTrace.findBestShiftParallel(synTrace);
 				Trace shiftObsTrace = obsTrace
 						.cutWindow(timewindows.get(i).getStartTime() + timeshift, timewindows.get(i).getEndTime() + timeshift);
 				double amplitudeRatio = shiftObsTrace.getYVector().getLInfNorm() / synTrace.getYVector().getLInfNorm();
 				double crosscorrelationAtBestShift = crossCorrelation(synTrace, shiftObsTrace);
 				
 				// compare with energy 15 s before and after the phase of interest
-				Trace traceBefore = obsNames.get(i).read().createTrace().cutWindow(shiftObsTrace.getXAt(0) - 5, shiftObsTrace.getXAt(0));
-				Trace traceAfter = obsNames.get(i).read().createTrace().cutWindow(shiftObsTrace.getXAt(shiftObsTrace.getLength() - 1), shiftObsTrace.getXAt(shiftObsTrace.getLength() - 1) + 5);
-				double snBefore = shiftObsTrace.getYVector().getNorm() / (shiftObsTrace.getXAt(shiftObsTrace.getLength() - 1) - shiftObsTrace.getXAt(0))
-						/ (traceBefore.getYVector().getNorm() / 5.);
-				double snAfter = shiftObsTrace.getYVector().getNorm() / (shiftObsTrace.getXAt(shiftObsTrace.getLength() - 1) - shiftObsTrace.getXAt(0))
-						/ (traceAfter.getYVector().getNorm() / 5.);
+//				Trace traceBefore = obsNames.get(i).read().createTrace().cutWindow(shiftObsTrace.getXAt(0) - 5, shiftObsTrace.getXAt(0));
+//				Trace traceAfter = obsNames.get(i).read().createTrace().cutWindow(shiftObsTrace.getXAt(shiftObsTrace.getLength() - 1), shiftObsTrace.getXAt(shiftObsTrace.getLength() - 1) + 5);
+//				double snBefore = shiftObsTrace.getYVector().getNorm() / (shiftObsTrace.getXAt(shiftObsTrace.getLength() - 1) - shiftObsTrace.getXAt(0))
+//						/ (traceBefore.getYVector().getNorm() / 5.);
+//				double snAfter = shiftObsTrace.getYVector().getNorm() / (shiftObsTrace.getXAt(shiftObsTrace.getLength() - 1) - shiftObsTrace.getXAt(0))
+//						/ (traceAfter.getYVector().getNorm() / 5.);
+				double snBefore = 0;
+				double snAfter = 0;
 				
 				timeshifts.add(new Measurement(timewindows.get(i), timeshift, amplitudeRatio, crosscorrelationAtBestShift, snBefore, snAfter));
 			} catch (IOException e) {
@@ -98,6 +138,22 @@ public class CrossCorrelationTimeshift {
 			}
 		}
 		return timeshifts;
+	}
+	
+	private static List<TimewindowInformation> readAndAlignTimewindows(Path timewindowPath, String refmodel, Path sacpath,
+			double timeBeforePeak, double timeAfterPeak, double minCc) {
+		List<TimewindowInformation> timewindows = null;
+		try {
+			timewindows = TimewindowInformationFile.read(timewindowPath).stream().collect(Collectors.toList());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if (refmodel.contains("3D") || refmodel.contains("1D") ) {
+			AlignWindows alignwindows = new AlignWindows(timewindows, sacpath, timeBeforePeak, timeAfterPeak, minCc);
+			alignwindows.run();
+			timewindows = alignwindows.getAlignedTimewindows();
+		}
+		return timewindows;
 	}
 	
 	private Trace interpolate(Trace trace, int sampling) {
@@ -200,31 +256,71 @@ public class CrossCorrelationTimeshift {
 	public static void compute_phase(List<TimewindowInformation> timewindows, String modelRefName, String modelName, String phaseName) {
 		String modelSyn = modelRefName;
 		String modelObs = modelName;
-		Path workDir = Paths.get("~/Dropbox/topo_eth_local/synthetics");
+//		Path workDir = Paths.get("/home/anselme/Dropbox/topo_eth_local/synthetics");
+		Path workDir = Paths.get(".");
 		Path obsPath = workDir.resolve(modelObs);
 		Path synPath = workDir.resolve(modelSyn);
 		boolean convolute = true;
 		
+
 		Path outpath = workDir.resolve("correlationTimeshift_" + modelSyn + "_" + modelObs + "_" + phaseName + ".dat");
+		
+		try {
+//			Seismic3Dmodel seismic3Dmodel = new GaussianPointPerturbation();
+//	
+		Seismic3Dmodel seismic3Dmodel = new TK10();
+			
+			List<raytheory.Measurement> rayMearuements = Compute.compute_phase(timewindows, seismic3Dmodel, phaseName);
+			
+			CrossCorrelationTimeshift ccShift = new CrossCorrelationTimeshift(timewindows
+					, obsPath, synPath, convolute);
+			List<Measurement> measurements = ccShift.calculate();
+			
+			PrintWriter pw = new PrintWriter(outpath.toFile());
+			for (int i = 0; i < timewindows.size(); i++) {
+				try {
+				Measurement m = measurements.get(i);
+				raytheory.Measurement mRay = rayMearuements.get(i);
+				ScatterPoint point = mRay.getScatterPointList().get(0);
+				pw.println(mRay.getTraveltimePerturbation() + " " + -m.getTimeshift() 
+					+ " " + m.getAmplitudeRatio() + " " + m.getCrosscorrelationAtBestShift()
+					+ " " + mRay.getEpicentralDistance()
+					+ " " + point.getPosition() + " " + mRay.getPhaseName() + " " + mRay.getStation().getStationName() + " " + mRay.getGlobalCMTID());
+				} catch (NullPointerException e) {
+					System.err.println("Problems with " + timewindows.get(i) + " " + rayMearuements.get(i).getEpicentralDistance());
+					continue;
+				}
+			}
+			pw.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void compute_windows(List<TimewindowInformation> timewindows, String modelRefName, String modelName) {
+		String modelSyn = modelRefName;
+		String modelObs = modelName;
+//		Path workDir = Paths.get("/home/anselme/Dropbox/topo_eth_local/synthetics");
+		Path workDir = Paths.get(".");
+		Path obsPath = workDir.resolve(modelObs);
+		Path synPath = workDir.resolve(modelSyn);
+		boolean convolute = true;
+		
+		Path outpath = workDir.resolve("correlationTimeshift_" + modelSyn + "_" + modelObs + ".dat");
 		
 		try {
 			CrossCorrelationTimeshift ccShift = new CrossCorrelationTimeshift(timewindows
 					, obsPath, synPath, convolute);
 			List<Measurement> measurements = ccShift.calculate();
 			
-			Seismic3Dmodel seismic3Dmodel = new TK10();
-			
-			List<raytheory.Measurement> rayMearuements = Compute.compute_phase(timewindows, seismic3Dmodel, phaseName);
-			
 			PrintWriter pw = new PrintWriter(outpath.toFile());
 			for (int i = 0; i < timewindows.size(); i++) {
 				Measurement m = measurements.get(i);
-				raytheory.Measurement mRay = rayMearuements.get(i);
-				ScatterPoint point = mRay.getScatterPointList().get(0);
-				pw.println(mRay.getTraveltimePerturbation() + " " + -m.getTimeshift() 
-					+ " " + m.getAmplitudeRatio() + " " + m.getCrosscorrelationAtBestShift()
-					+ " " + m.getSn0() + " " + m.getSn1() + " " + mRay.getEpicentralDistance()
-					+ " " + point.getPosition() + mRay.getPhaseName() + " " + mRay.getStation().getStationName() + " " + mRay.getGlobalCMTID());
+				pw.println(-m.getTimeshift() 
+					+ " " + m.getAmplitudeRatio() + " " + m.getCrosscorrelationAtBestShift() + " "
+					+ timewindows.get(i).getDistanceDegree() + " " + timewindows.get(i).getAzimuthDegree()
+					+ " " + timewindows.get(i).getStation().getStationName() + " " + timewindows.get(i).getGlobalCMTID());
 			}
 			pw.close();
 			

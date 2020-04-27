@@ -26,7 +26,8 @@ public class TK10 implements Seismic3Dmodel {
 	
 	private List<List<Double>> coeffs;
 	
-	private Seismic3Dmodel mantleModel = new SEMUCBWM1(); 
+	private Seismic3Dmodel mantleModel = new SEMUCBWM1();
+//	private Seismic3Dmodel mantleModel = new TestModel();
 	
 	public static void main(String[] args) throws IOException {
 		TK10 tk10 = new TK10();
@@ -41,7 +42,7 @@ public class TK10 implements Seismic3Dmodel {
 		rmin = 0.;
 		rmax = 6371.;
 		
-//		Path modelPath = Paths.get("/home/navy/git/TopoCMB/resources/tanaka10_lon.sph");
+//		Path modelPath = Paths.get("/home/anselme/git/TomoTool/resources/tanaka10_lon.sph");
 //		try {
 //		coeffs = ReadUtils.readSphFile(modelPath);
 //		} catch (IOException e) {
@@ -98,5 +99,10 @@ public class TK10 implements Seismic3Dmodel {
 	@Override
 	public void outputLayer(Path outputpath, double r) throws IOException {
 		
+	}
+	
+	@Override
+	public String getName() {
+		return "tk10";
 	}
 }

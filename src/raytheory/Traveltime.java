@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import io.github.kensuke1984.kibrary.dsminformation.PolynomialStructure;
 import io.github.kensuke1984.kibrary.util.Location;
+import raytheory.TauPUtils.Ray;
 import topoModel.SEMUCBWM1;
 import topoModel.SH18CEX;
 import topoModel.Seismic3Dmodel;
@@ -90,6 +91,21 @@ public class Traveltime {
 		kernel = new Kernel(structure);
 	}
 	
+	private List<int[]> create_batches(int maxNinBatch) {
+		List<int[]> batches = new ArrayList<>();
+		int n_raypaths = raypathInformations.size();
+		if (maxNinBatch > n_raypaths)
+			batches.add(new int[] {0, n_raypaths});
+		else {
+			int n_batches = n_raypaths / maxNinBatch;
+			if (n_batches % maxNinBatch != 0) n_batches += 1;
+			for (int i = 0; i < n_batches - 1; i++)
+				batches.add(new int[] {i * maxNinBatch, (i+1) * maxNinBatch});
+			batches.add(new int[] {(n_batches-1) * maxNinBatch, n_raypaths});
+		}
+		return batches;
+	}
+	
 	public void run() {
 		measurements.clear();
 		System.out.println("Going for " + raypathInformations.size() + " raypaths");
@@ -97,30 +113,45 @@ public class Traveltime {
 		AtomicInteger count = new AtomicInteger();
 		TauPUtils taupUtils = new TauPUtils(modelName);
 		taupUtils.parsePhasesList(phaseList);
+		List<int[]> batches = create_batches((int) (1e5));
+		
 		for (RaypathInformation raypathInformation : raypathInformations) {
-//		raypathInformations.stream().parallel().forEach(raypathInformation -> {
+//		raypathInformations.parallelStream().forEach(raypathInformation -> {
 			taupUtils.setCMTLocation(raypathInformation.getCmtLocation());
 			
-			taupUtils.calculate(raypathInformation.getStationPosition());
-			Map<String, List<ScatterPoint>> scatterPointMap = taupUtils.getScatterPointMap();
-			Map<String, Location[]> raypathMap = taupUtils.getRaypathMap();
+			try {
+				taupUtils.calculate(raypathInformation.getStationPosition());
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+				continue;
+			}
+			
+//			Map<String, List<ScatterPoint>> scatterPointMap = taupUtils.getScatterPointMap();
+//			Map<String, Location[]> raypathMap = taupUtils.getRaypathMap();
+			
+			List<Ray> rays = taupUtils.getRays();
 			
 			double dH = 0.;
 			List<Measurement> thisRecordList = new ArrayList<>();
-			for (String phaseName : taupUtils.getPhaseNames()) {
+			for (Ray ray : rays) {
+				String phaseName = ray.phaseName;
+				
 				double[] traveltimes = new double[3];
 				boolean addPoint = true;
 				
-				List<ScatterPoint> scatterPoints = scatterPointMap.get(phaseName);
+//				List<ScatterPoint> scatterPoints = scatterPointMap.get(phaseName);
+				List<ScatterPoint> scatterPoints = ray.scatterPoints;
+				
 				if (scatterPoints != null) {
 					// Effect of CMB topo
 					if (!ignoreCMBElevation) {
 						for (ScatterPoint sp : scatterPoints) {
 							dH = seismic3Dmodel.getCMBElevation(sp.getPosition());
 							try {
-								traveltimes = add(traveltimes, calculate(sp, dH));
+								double[] dts = calculate(sp, dH);
+								traveltimes = add(traveltimes, dts);
 							} catch (IllegalArgumentException e) {
-								System.err.println(sp + " " + raypathInformation.getStationPosition() + " " + raypathInformation.getCmtLocation());
+								System.err.println(sp + " " + raypathInformation.getStationPosition() + " " + raypathInformation.getCmtLocation() + " " + raypathInformation.getDistanceDegree());
 								addPoint = false;
 							}
 						}
@@ -129,7 +160,8 @@ public class Traveltime {
 				
 				// Effect of 3-D mantle velocity
 				if (!ignoreMantle) {
-					Location[] raypath = raypathMap.get(phaseName);
+//					Location[] raypath = raypathMap.get(phaseName);
+					Location[] raypath = ray.raypath;
 					if (raypath != null)
 						if (addPoint) {
 							traveltimes = add(traveltimes, calculateV(raypath, phaseName));
@@ -138,10 +170,10 @@ public class Traveltime {
 				
 				if (addPoint)
 					thisRecordList.add(new Measurement(raypathInformation.getStation(), raypathInformation.getEvent()
-							, phaseName, scatterPointMap.get(phaseName), traveltimes));
+							, phaseName, scatterPoints, traveltimes));
 				else
 					thisRecordList.add(new Measurement(raypathInformation.getStation(), raypathInformation.getEvent()
-							, phaseName, scatterPointMap.get(phaseName), new double[] {Double.NaN, Double.NaN, Double.NaN}));
+							, phaseName, scatterPoints, new double[] {Double.NaN, Double.NaN, Double.NaN}));
 			}
 			measurements.add(thisRecordList);
 		
@@ -250,16 +282,21 @@ public class Traveltime {
 	private double[] calculateOnePointV(double l, Location loc1, Location loc2, String phaseName) {
 		double[] times = new double[3];
 		if (phaseName.equals("SKS") || phaseName.equals("SKKS") || phaseName.equals("SKKKS") || phaseName.equals("SKKKS") || phaseName.equals("S") || phaseName.equals("ScS")
-				|| phaseName.equals("ScSScS") || phaseName.equals("ScSScSScS")) {
+				|| phaseName.equals("ScSScS") || phaseName.equals("ScSScSScS")
+				|| phaseName.equals("SKKSm") || phaseName.equals("SKSm")) {
 			double r1, r2;
 			if (loc1.getR() > loc2.getR()) {
-				r1 = loc1.getR() - 1e-5;
-				r2 = loc2.getR() + 1e-5;
+				r1 = loc1.getR() - 1e-7;
+				r2 = loc2.getR() + 1e-7;
 			}
 			else {
-				r1 = loc1.getR() + 1e-5;
-				r2 = loc2.getR() - 1e-5;
+				r1 = loc1.getR() + 1e-7;
+				r2 = loc2.getR() - 1e-7;
 			}
+			//fix
+			if (loc1.getR() >= 3480 && r1 < 3480) r1 = 3480;
+			if (loc2.getR() >= 3480 && r2 < 3480) r2 = 3480;
+			//
 			if (r1 < 3480. && r1 >= 1221.5) {
 				times[0] = -l / (seismic3Dmodel.getVp(r1) + seismic3Dmodel.getVp(r2)) * (seismic3Dmodel.getdlnVp(loc1.toLocation(r1)) + seismic3Dmodel.getdlnVp(loc2.toLocation(r2)));
 				times[1] = 2 * l / (seismic3Dmodel.getVp(r1) + seismic3Dmodel.getVp(r2));

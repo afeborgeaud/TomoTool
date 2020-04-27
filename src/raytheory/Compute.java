@@ -3,14 +3,19 @@ package raytheory;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.math3.linear.ArrayRealVector;
+
+import edu.sc.seis.TauP.SphericalCoords;
 import edu.sc.seis.TauP.TauModelException;
 import edu.sc.seis.TauP.TauP_Time;
 import io.github.kensuke1984.anisotime.Phase;
@@ -22,8 +27,10 @@ import io.github.kensuke1984.kibrary.util.HorizontalPosition;
 import io.github.kensuke1984.kibrary.util.Station;
 import io.github.kensuke1984.kibrary.util.globalcmt.GlobalCMTID;
 import io.github.kensuke1984.kibrary.util.sac.SACComponent;
+import topoModel.ExternalModel;
 import topoModel.GaussianPointPerturbation;
 import topoModel.LLNLG3DJPS;
+import topoModel.S20RTS;
 import topoModel.SEMUCBWM1;
 import topoModel.Seismic3Dmodel;
 import topoModel.TK10;
@@ -32,16 +39,71 @@ import utilities.ReadUtils;
 public class Compute {
 
 	public static void main(String[] args) throws IOException {
-		if (args.length == 0)
-			Compute_SmKS();
-		else if (args.length == 3) {
-			Path timewindowPath = Paths.get(args[0]);
-			String threeDmodel = args[1].trim().toLowerCase();
-			String phase = args[2].trim();
-			
-			compute_phase(timewindowPath, threeDmodel, phase, false, true);
-			compute_phase(timewindowPath, threeDmodel, phase, true, false);
-		}
+//		compute_ScS_differential();
+		
+//		compute_geodynamics_models(false, true);
+		
+		compute_geodynamics_models_diff(true, false, "SKKS", 20);
+		
+//		compute_geodynamics_models_diff(false, true, "SKKS", 4);
+//		compute_geodynamics_models_diff(false, true, "SKKS", 20);
+//		compute_geodynamics_models_diff(true, true, "SKKS", 4);
+//		compute_geodynamics_models_diff(true, true, "SKKS", 20);
+//		
+//		compute_geodynamics_models_diff(false, true, "ScS", 4);
+//		compute_geodynamics_models_diff(false, true, "ScS", 20);
+//		compute_geodynamics_models_diff(true, true, "ScS", 4);
+//		compute_geodynamics_models_diff(true, true, "ScS", 20);
+		
+//		compute_geodynamics_models_diff(false, true, "ScS");
+//		compute_geodynamics_models_diff(true, true, "ScS");
+		
+//		compute_geodynamics_models_diff(true, true, "SKKS");
+//		compute_geodynamics_models_diff(true, true, "ScS");
+		
+//		if (args.length == 0)
+//			Compute_SmKS();
+//		else if (args.length == 3) {
+//			Path timewindowPath = Paths.get(args[0]);
+//			String threeDmodel = args[1].trim().toLowerCase();
+//			String phase = args[2].trim();
+//			
+//			compute_phase(timewindowPath, threeDmodel, phase, false, true);
+//			compute_phase(timewindowPath, threeDmodel, phase, true, false);
+//		}
+//		else if (args.length == 4) {
+//			Path timewindowPath = Paths.get(args[0]);
+//			String threeDmodel = args[1].trim().toLowerCase();
+//			String phaseRef = args[2].trim();
+//			String phase = args[3].trim();
+//			
+//			if (!threeDmodel.equals("s20rts"))
+//				return;
+//			
+//			List<TimewindowInformation> timewindows = TimewindowInformationFile
+//					.read(timewindowPath).stream().collect(Collectors.toList());
+//			
+//			int nlmax = 4;
+//			S20RTS seismic3dmodel = new S20RTS(2);
+//			seismic3dmodel.filter(nlmax);
+//			compute_phase_differential(timewindows, seismic3dmodel, phaseRef, phase, false, true);
+//			compute_phase_differential(timewindows, seismic3dmodel, phaseRef, phase, true, false);
+//			
+//			seismic3dmodel = new S20RTS(-2);
+//			seismic3dmodel.filter(nlmax);
+//			compute_phase_differential(timewindows, seismic3dmodel, phaseRef, phase, false, true);
+//			compute_phase_differential(timewindows, seismic3dmodel, phaseRef, phase, true, false);
+//			
+//			seismic3dmodel = new S20RTS(4);
+//			seismic3dmodel.filter(nlmax);
+//			compute_phase_differential(timewindows, seismic3dmodel, phaseRef, phase, false, true);
+//			compute_phase_differential(timewindows, seismic3dmodel, phaseRef, phase, true, false);
+//			
+//			seismic3dmodel = new S20RTS(-4);
+//			seismic3dmodel.filter(nlmax);
+//			compute_phase_differential(timewindows, seismic3dmodel, phaseRef, phase, false, true);
+//			compute_phase_differential(timewindows, seismic3dmodel, phaseRef, phase, true, false);
+//		}
 		
 	}
 	
@@ -154,6 +216,49 @@ public class Compute {
 		pwTimeSKKS.close();
 		pwPierceSKKS.close();
 		pwTimeS3KS.close();
+	}
+	
+	public static void compute_ScS_differential() {
+		Path rootpath = Paths.get("/home/anselme/Dropbox/topo_eth_local/eventsmetadata/DATALESS");
+		Path rayinfoPath = Paths.get("/home/anselme/Dropbox/topo_eth_local/eventsmetadata/DATALESS/rayinfo_ScS.inf");
+		String threeDmodel = "s20rts";
+		String phaseRef = "S";
+		String phase = "ScS";
+		
+		if (!threeDmodel.equals("s20rts"))
+			return;
+		
+		try {
+			List<RaypathInformation> rayinfo = RaypathInformation.readRaypathInformation(rayinfoPath);
+			
+			List<RaypathInformation> rayinfo_CA = rayinfo.parallelStream().filter(ray -> {
+				double latitude = SphericalCoords.latFor(ray.getCmtLocation().getLatitude(),
+						ray.getCmtLocation().getLongitude(), ray.getDistanceDegree() / 2., ray.getAzimuthDegree());
+				double longitude = SphericalCoords.lonFor(ray.getCmtLocation().getLatitude(),
+						ray.getCmtLocation().getLongitude(), ray.getDistanceDegree() / 2., ray.getAzimuthDegree());
+				if (latitude >= -10 && latitude <= 30
+					&& longitude >= -110 && longitude <= -60)
+					return true;
+				else
+					return false;
+			}).collect(Collectors.toList());
+			System.out.println(rayinfo_CA.size());
+			
+			System.out.println("Running long wavelength model");
+			int nlmax = 4;
+			S20RTS seismic3dmodel = new S20RTS(2.5);
+			seismic3dmodel.filter(nlmax);
+			compute_phase_differential_raypathinfo(rayinfo, seismic3dmodel, phaseRef, phase, false, true, rootpath);
+			compute_phase_differential_raypathinfo(rayinfo, seismic3dmodel, phaseRef, phase, true, false, rootpath);
+			
+			System.out.println("Running short wavelength model");
+			seismic3dmodel = new S20RTS(-8, 2.5);
+			compute_phase_differential_raypathinfo(rayinfo_CA, seismic3dmodel, phaseRef, phase, false, true, rootpath);
+			compute_phase_differential_raypathinfo(rayinfo_CA, seismic3dmodel, phaseRef, phase, true, false, rootpath);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	
@@ -280,6 +385,265 @@ public class Compute {
 		
 	}
 	
+	public static void compute_phase_differential(Path timewindowPath, String threeDmodel, String phaseRefName,
+			String phaseName, boolean switchMantle, boolean switchTopo) throws IOException {
+		Set<TimewindowInformation> timewindows = TimewindowInformationFile.read(timewindowPath);
+		
+		//Select raypaths
+		List<RaypathInformation> raypathInformations = timewindows.stream()
+				.map(tw -> new RaypathInformation(tw.getStation(), tw.getGlobalCMTID()))
+				.collect(Collectors.toList());
+		
+		String modelName = "prem";
+		
+		Seismic3Dmodel seismic3Dmodel = null;
+		switch (threeDmodel) {
+		case "semucb":	
+			seismic3Dmodel = new SEMUCBWM1();
+			break;
+		case "llnlg3d":
+			seismic3Dmodel = new LLNLG3DJPS();
+			break;
+		case "S20RTS":
+			seismic3Dmodel = new S20RTS();
+			break;
+		default:
+			throw new RuntimeException("Error: 3D model " + threeDmodel + " not implemented yet");
+		}
+		
+		String phaseListString = String.format("%s, %s", phaseRefName, phaseName);
+		Traveltime traveltimetool = new Traveltime(raypathInformations, modelName, seismic3Dmodel, phaseListString);
+		
+		traveltimetool.setIgnoreMantle(!switchMantle);
+		traveltimetool.setIgnoreCMBElevation(!switchTopo);
+		
+		String switchString = "";
+		if (switchMantle)
+			switchString += "3d";
+		if (switchTopo)
+			switchString += "topo";
+		
+		traveltimetool.run();
+		List<List<Measurement>> measurements = traveltimetool.getMeasurements();
+		
+		List<Measurement> measurements_ScS = new ArrayList<>();
+		List<Measurement> measurements_S = new ArrayList<>();
+		Set<StaticCorrection> corrections = new HashSet<>();
+		
+		Path outpath = Paths.get("dt_diff_" + threeDmodel + "_" + switchString + "_" + phaseRefName + "_" + phaseName + ".dat");
+		PrintWriter pw = new PrintWriter(outpath.toFile());
+		
+		for (List<Measurement> record : measurements) {
+			Set<String> phases = record.stream().map(p -> p.getPhaseName()).collect(Collectors.toSet());
+			if (!(phases.contains(phaseRefName) && phases.contains(phaseName))) {
+				System.err.println(record);
+				continue;
+			}
+			Measurement mRef = null;
+			Measurement m = null;
+			for (Measurement mm : record) {
+				if (mm.getPhaseName().equals(phaseRefName)) {
+					mRef = mm;
+					measurements_ScS.add(mRef);
+				}
+				else if (mm.getPhaseName().equals(phaseName)) {
+					m = mm;
+					measurements_S.add(m);
+				}
+			}
+			
+//			double shift = -(mScS.getTraveltimePerturbation() - mS.getTraveltimePerturbation());
+			double shift = -(m.getTraveltimePerturbationToPREM() - mRef.getTraveltimePerturbationToPREM());
+			
+			pw.println();
+		}
+		pw.close();
+		
+	}
+	
+	public static void compute_phase_differential(List<TimewindowInformation> timewindows, Seismic3Dmodel seismic3Dmodel
+			, String phaseRefName, String phaseName, boolean switchMantle, boolean switchTopo) throws IOException {
+		
+		//Select raypaths
+		List<RaypathInformation> raypathInformations = timewindows.stream()
+				.map(tw -> new RaypathInformation(tw.getStation(), tw.getGlobalCMTID()))
+				.collect(Collectors.toList());
+		
+		String modelName = "prem";
+		
+		String phaseListString = String.format("%s, %s", phaseRefName, phaseName);
+		Traveltime traveltimetool = new Traveltime(raypathInformations, modelName, seismic3Dmodel, phaseListString);
+		
+		traveltimetool.setIgnoreMantle(!switchMantle);
+		traveltimetool.setIgnoreCMBElevation(!switchTopo);
+		
+		String switchString = "";
+		if (switchMantle)
+			switchString += "3d";
+		if (switchTopo)
+			switchString += "topo";
+		
+		traveltimetool.run();
+		List<List<Measurement>> measurements = traveltimetool.getMeasurements();
+		
+		List<Measurement> measurements_ScS = new ArrayList<>();
+		List<Measurement> measurements_S = new ArrayList<>();
+		
+		Path outpath = Paths.get("dt_diff_" + seismic3Dmodel.getName() + "_" + switchString + "_" + phaseRefName + "_" + phaseName + ".dat");
+		PrintWriter pw = new PrintWriter(outpath.toFile());
+		
+		for (List<Measurement> record : measurements) {
+			Set<String> phases = record.stream().map(p -> p.getPhaseName()).collect(Collectors.toSet());
+			if (!(phases.contains(phaseRefName) && phases.contains(phaseName))) {
+				System.err.println(record);
+				continue;
+			}
+			Measurement mRef = null;
+			Measurement m = null;
+			for (Measurement mm : record) {
+				if (mm.getPhaseName().equals(phaseRefName)) {
+					mRef = mm;
+					measurements_ScS.add(mRef);
+				}
+				else if (mm.getPhaseName().equals(phaseName)) {
+					m = mm;
+					measurements_S.add(m);
+				}
+			}
+			
+//			double shift = -(mScS.getTraveltimePerturbation() - mS.getTraveltimePerturbation());
+			double shift = -(m.getTraveltimePerturbationToPREM() - mRef.getTraveltimePerturbationToPREM());
+			ScatterPoint p = m.getScatterPointList().get(0);
+			String tmpStr = String.format("%.5f", shift) + " " + p.getPosition() + " " + m.getEpicentralDistance() + " " + m.getAzimuth() + " " + p.getType();
+			pw.println(tmpStr);
+		}
+		pw.close();
+		
+	}
+	
+	private static List<int[]> create_batches(int maxNinBatch, int n_raypaths) {
+		List<int[]> batches = new ArrayList<>();
+		if (maxNinBatch > n_raypaths)
+			batches.add(new int[] {0, n_raypaths});
+		else {
+			int n_batches = n_raypaths / maxNinBatch;
+			if (n_batches % maxNinBatch != 0) n_batches += 1;
+			for (int i = 0; i < n_batches - 1; i++)
+				batches.add(new int[] {i * maxNinBatch, (i+1) * maxNinBatch});
+			batches.add(new int[] {(n_batches-1) * maxNinBatch, n_raypaths});
+		}
+		return batches;
+	}
+	
+	public static void compute_phase_differential_raypathinfo(List<RaypathInformation> raypathInformations,
+			Seismic3Dmodel seismic3Dmodel, String phaseRefName, String phaseName, boolean switchMantle,
+			boolean switchTopo, Path rootpath, String path_suffix) throws IOException {
+		String modelName = "prem";
+		
+		String phaseListString = String.format("%s, %s", phaseRefName, phaseName);
+		
+		String switchString = "";
+		if (switchMantle)
+			switchString += "3d";
+		if (switchTopo)
+			switchString += "topo";
+		
+		Path outpath = null;
+		if (path_suffix != null)
+			outpath = rootpath.resolve("dt_diff_" + seismic3Dmodel.getName() + "_" + switchString +
+					"_" + phaseRefName + "_" + phaseName + "_" + path_suffix + ".dat");
+		else
+			outpath = rootpath.resolve("dt_diff_" + seismic3Dmodel.getName() + "_" +
+					switchString + "_" + phaseRefName + "_" + phaseName + ".dat");
+		
+		List<String> outputStrs = new ArrayList<>();
+		
+		List<int[]> batches = create_batches((int) (1e4), raypathInformations.size());
+//		batches.stream().forEach(b -> System.out.println(b[0] + " " + b[1]));
+		
+//		for (int[] batch : batches) {
+		batches.parallelStream().forEach(batch -> {
+			Traveltime traveltimetool = new Traveltime(raypathInformations.subList(batch[0], batch[1]),
+					modelName, seismic3Dmodel, phaseListString);
+			
+			traveltimetool.setIgnoreMantle(!switchMantle);
+			traveltimetool.setIgnoreCMBElevation(!switchTopo);
+			
+			traveltimetool.run();
+			List<List<Measurement>> measurements = traveltimetool.getMeasurements();
+			
+			List<Measurement> measurements_ScS = new ArrayList<>();
+			List<Measurement> measurements_S = new ArrayList<>();
+			
+			for (List<Measurement> record : measurements) {
+				Set<String> phases = record.stream().map(p -> p.getPhaseName()).collect(Collectors.toSet());
+				if (!(phases.contains(phaseRefName) && phases.contains(phaseName))) {
+					System.err.println(record);
+					continue;
+				}
+				Measurement mRef = null;
+				Measurement m = null;
+				for (Measurement mm : record) {
+					if (mm.getPhaseName().equals(phaseRefName)) {
+						mRef = mm;
+						measurements_ScS.add(mRef);
+					}
+					else if (mm.getPhaseName().equals(phaseName)) {
+						m = mm;
+						measurements_S.add(m);
+					}
+				}
+				
+	//			double shift = -(mScS.getTraveltimePerturbation() - mS.getTraveltimePerturbation());
+	//			double shift = -(m.getTraveltimePerturbationToPREM() - mRef.getTraveltimePerturbationToPREM());
+				double shift = (m.getTraveltimePerturbationToPREM() - mRef.getTraveltimePerturbationToPREM());
+	//			if (mRef.getTraveltimePerturbationToPREM() != 0)
+	//				System.out.println(mRef.getTraveltimePerturbationToPREM());
+				
+				List<String> tmpStrs = new ArrayList<String>();
+				if (m.getPhaseName().equals("ScS")) {
+					ScatterPoint p = m.getScatterPointList().get(0);
+					String tmpStr = String.format("%.5f", shift) + " " + p.getPosition() +
+						" " + m.getEpicentralDistance() + " " + m.getAzimuth() + " " + p.getType() +
+						" " + m.getPhaseName();
+					tmpStrs.add(tmpStr);
+				}
+				else if (m.getPhaseName().equals("SKKS") || m.getPhaseName().equals("SKKSm")) {
+					ScatterPoint p = m.getScatterPointList().get(1);
+					String tmpStr = String.format("%.5f", shift) + " " + p.getPosition() +
+						" " + m.getEpicentralDistance() + " " + m.getAzimuth() + " " + p.getType() +
+						" " + m.getPhaseName();
+					tmpStrs.add(tmpStr);
+				}
+	//			else if (m.getPhaseName().equals("SKS") || m.getPhaseName().equals("SKSm")) {
+	//				for (ScatterPoint p : m.getScatterPointList()) {
+	//					String tmpStr = String.format("%.5f", shift) + " " + p.getPosition() +
+	//						" " + m.getEpicentralDistance() + " " + m.getAzimuth() + " " + p.getType() +
+	//						" " + m.getPhaseName();
+	//					tmpStrs.add(tmpStr);
+	//				}
+	//			}
+				
+				for (String tmpStr : tmpStrs)
+					outputStrs.add(tmpStr);
+			}
+//		}
+		});
+		
+		PrintWriter pw = new PrintWriter(outpath.toFile());
+		for (String line : outputStrs)
+			pw.println(line);
+		pw.close();
+		
+	}
+	
+	public static void compute_phase_differential_raypathinfo(List<RaypathInformation> raypathInformations,
+			Seismic3Dmodel seismic3Dmodel, String phaseRefName, String phaseName, boolean switchMantle,
+			boolean switchTopo, Path rootpath) throws IOException {
+		compute_phase_differential_raypathinfo(raypathInformations, seismic3Dmodel,
+				phaseRefName, phaseName, switchMantle, switchTopo, rootpath, null);
+	}
+	
 	public static void compute_phase(Path timewindowPath, String threeDmodel, String phaseName, boolean switchMantle, boolean switchTopo) throws IOException {
 		Set<TimewindowInformation> timewindows = TimewindowInformationFile.read(timewindowPath);
 		
@@ -350,7 +714,8 @@ public class Compute {
 		
 	}
 	
-	public static List<Measurement> compute_phase(List<TimewindowInformation> timewindows, Seismic3Dmodel seismic3Dmodel, String phaseName) throws IOException {
+	public static List<Measurement> compute_phase(List<TimewindowInformation> timewindows, Seismic3Dmodel seismic3Dmodel,
+			String phaseName) throws IOException {
 		List<RaypathInformation> raypathInformations = timewindows.stream()
 				.map(tw -> new RaypathInformation(tw.getStation(), tw.getGlobalCMTID()))
 				.collect(Collectors.toList());
@@ -367,18 +732,230 @@ public class Compute {
 		
 		List<Measurement> measurements = new ArrayList<>();
 		
+		System.out.println(timewindows.size() + " " + measurements_tmp.size());
 		
 		for (int i = 0; i < timewindows.size(); i++) {
 			List<Measurement> record = measurements_tmp.get(i);
 			for (Measurement m : record) {
-				if (m.getPhaseName().equals(phaseName)) {
+				if (m.getPhaseName().equals(phaseName) || m.getPhaseName().equals(phaseName + "m")) {
 //					Measurement mm = new data.Measurement(timewindows.get(i), m.getTraveltimePerturbation(), 1., 1.);
 					measurements.add(m);
 				}
+				else
+					System.err.println("Warning " + phaseName + " " + m.getPhaseName());
 			}
 		}
 		
 		return measurements;
+	}
+	
+	public static List<Measurement> compute_phase_raypathinfo(List<RaypathInformation> raypathInformations,
+			Seismic3Dmodel seismic3Dmodel, String phaseName) throws IOException {
+		String modelName = "prem";
+		
+		Traveltime traveltimetool = new Traveltime(raypathInformations, modelName, seismic3Dmodel, phaseName);
+		
+		traveltimetool.setIgnoreMantle(true);
+		traveltimetool.setIgnoreCMBElevation(false);
+		
+		traveltimetool.run();
+		List<List<Measurement>> measurements_tmp = traveltimetool.getMeasurements();
+		
+		List<Measurement> measurements = new ArrayList<>();
+		
+		System.out.println(raypathInformations.size() + " " + measurements_tmp.size());
+		
+		for (int i = 0; i < raypathInformations.size(); i++) {
+			List<Measurement> record = measurements_tmp.get(i);
+			for (Measurement m : record) {
+				if (m.getPhaseName().equals(phaseName) || m.getPhaseName().equals(phaseName + "m")) {
+//				if (m.getPhaseName().equals(phaseName)) {
+//					Measurement mm = new data.Measurement(timewindows.get(i), m.getTraveltimePerturbation(), 1., 1.);
+					measurements.add(m);
+				}
+				else
+					System.err.println("Warning " + phaseName + " " + m.getPhaseName());
+			}
+		}
+		
+		return measurements;
+	}
+	
+	public static void compute_geodynamics_models(
+			boolean switchMantle, boolean switchTopo) {
+		Path model_root = Paths.get("/home/anselme/Dropbox/topo_eth_local/models/geodynamics");
+		Path out_root = Paths.get("/home/anselme/Dropbox/topo_eth_local/raytheory/geodynamics");
+		Path rayinfoPath = Paths.get("/home/anselme/Dropbox/topo_eth_local/eventsmetadata/DATALESS/rayinfo_ScS.inf");
+//		Path rayinfoPath = Paths.get("/home/anselme/Dropbox/topo_eth_local/eventsmetadata/DATALESS/rayinfo_dist_90_140.inf");
+		
+		String[] phaseNames = new String[] {"ScS"};
+//		String[] phaseNames = new String[] {"SKKS"};
+//		String[] phaseNames = new String[] {"SKS"};
+		
+		String switchString = "";
+		if (switchMantle)
+			switchString += "3d";
+		if (switchTopo)
+			switchString += "topo";
+		
+		
+		try {
+			List<RaypathInformation> rayinfo = RaypathInformation.readRaypathInformation(rayinfoPath);
+			
+			Map<GlobalCMTID, Long> eventCounts = rayinfo.stream().collect(
+					Collectors.groupingByConcurrent(RaypathInformation::getEvent, Collectors.counting()));
+			
+			System.out.println("Num. raypaths: " + rayinfo.size());
+			
+			int lmax = 20;
+			
+			double min_depth = 100.;
+			double min_record_per_event = 50;
+			rayinfo = rayinfo.parallelStream()
+					.filter(rinfo -> {
+						double depth = 6371. - rinfo.getEvent().getEvent().getCmtLocation().getR();
+						int count = eventCounts.get(rinfo.getEvent()).intValue();
+						return depth >= min_depth && count >= min_record_per_event;
+					}).collect(Collectors.toList());
+		
+			System.out.println("Num. raypaths after filtering: " + rayinfo.size());
+			List<Path> models_path = Files.list(model_root).filter(s -> s.toString().endsWith("_rot_l20.ylm")).collect(Collectors.toList());
+			
+			for (Path model_path : models_path) {
+				System.out.println(model_path.getFileName());
+				
+				String model_name = model_path.getFileName().toString().replace(".ylm", "");
+				ExternalModel seismic3Dmodel = new ExternalModel(model_path.toString(), model_name, true);
+				
+				seismic3Dmodel.filter(lmax);
+				
+				ArrayRealVector topos = new ArrayRealVector(180*360/4);
+				int i = 0;
+				for (int lon = -180; lon < 180; lon +=2) {
+					for (int lat = -90; lat < 90; lat += 2) {
+						double topo = seismic3Dmodel.getCMBElevation(new HorizontalPosition(lat, lon));
+						topos.setEntry(i, topo);
+						i++;
+					}
+				}
+				System.out.println("Max topo: " + topos.getLInfNorm());
+				
+				for (String phaseName : phaseNames) {
+					List<Measurement> measurements = compute_phase_raypathinfo(rayinfo, seismic3Dmodel, phaseName);
+					
+					Path outpath = out_root.resolve("dt_" + model_name + "_l" + lmax + "_depth" + min_depth + "_" + switchString + phaseName + ".dat");
+					PrintWriter pw = new PrintWriter(outpath.toFile());
+					
+					for (Measurement m : measurements) {
+						double shift = m.getTraveltimePerturbationToPREM();
+						List<String> tmpStrs = new ArrayList<String>();
+						if (m.getPhaseName().equals("ScS")) {
+							ScatterPoint p = m.getScatterPointList().get(0);
+							String tmpStr = String.format("%.5f", shift) + " " + p.getPosition() +
+								" " + m.getEpicentralDistance() + " " + m.getAzimuth() + " " + p.getType() +
+								" " + m.getPhaseName();
+							tmpStrs.add(tmpStr);
+						}
+						else if (m.getPhaseName().equals("SKKS") || m.getPhaseName().equals("SKKSm")) {
+							ScatterPoint p = m.getScatterPointList().get(1);
+							String tmpStr = String.format("%.5f", shift) + " " + p.getPosition() +
+								" " + m.getEpicentralDistance() + " " + m.getAzimuth() + " " + p.getType() +
+								" " + m.getPhaseName();
+							tmpStrs.add(tmpStr);
+						}
+						else if (m.getPhaseName().equals("SKS") || m.getPhaseName().equals("SKSm")) {
+							for (ScatterPoint p : m.getScatterPointList()) {
+								String tmpStr = String.format("%.5f", shift) + " " + p.getPosition() +
+									" " + m.getEpicentralDistance() + " " + m.getAzimuth() + " " + p.getType() +
+									" " + m.getPhaseName();
+								tmpStrs.add(tmpStr);
+							}
+						}
+						
+						for (String s : tmpStrs)
+							pw.println(s);
+					}
+					pw.close();
+				}
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void compute_geodynamics_models_diff(boolean switchMantle, boolean switchTopo,
+			String phaseString, int lmax) {
+		Path model_root = Paths.get("/home/anselme/Dropbox/topo_eth_local/models/geodynamics");
+		Path out_root = Paths.get("/home/anselme/Dropbox/topo_eth_local/raytheory/geodynamics");
+		
+		Path rayinfoPath = null;
+		String phaseRefName = null;
+		String[] phaseNames = null;
+		
+		if (phaseString.equals("ScS")) {
+			rayinfoPath = Paths.get("/home/anselme/Dropbox/topo_eth_local/eventsmetadata/DATALESS/rayinfo_ScS.inf");
+			phaseRefName = "S";
+			phaseNames = new String[] {"ScS"};
+		}
+		else if (phaseString.equals("SKKS")) {
+			rayinfoPath = Paths.get("/home/anselme/Dropbox/topo_eth_local/eventsmetadata/DATALESS/rayinfo_dist_90_140_test.inf");
+			phaseRefName = "SKS";
+			phaseNames = new String[] {"SKKS"};
+		}
+		else {
+			return;
+		}
+		
+		try {
+			List<RaypathInformation> rayinfo = RaypathInformation.readRaypathInformation(rayinfoPath);
+			
+			Map<GlobalCMTID, Long> eventCounts = rayinfo.stream().collect(
+					Collectors.groupingByConcurrent(RaypathInformation::getEvent, Collectors.counting()));
+			
+			System.out.println("Num. raypaths: " + rayinfo.size());
+			
+			double min_depth = 100.;
+			double min_record_per_event = 50;
+			rayinfo = rayinfo.parallelStream()
+					.filter(rinfo -> {
+						double depth = 6371. - rinfo.getEvent().getEvent().getCmtLocation().getR();
+						int count = eventCounts.get(rinfo.getEvent()).intValue();
+						return depth >= min_depth && count >= min_record_per_event;
+					}).collect(Collectors.toList());
+		
+			System.out.println("Num. raypaths after filtering: " + rayinfo.size());
+			List<Path> models_path = Files.list(model_root).filter(s -> s.toString().endsWith("_rot_l20.ylm")).collect(Collectors.toList());
+			
+			for (Path model_path : models_path) {
+				System.out.println(model_path.getFileName());
+				
+				String model_name = model_path.getFileName().toString().replace(".ylm", "");
+				ExternalModel seismic3Dmodel = new ExternalModel(model_path.toString(), model_name, true);
+				
+				seismic3Dmodel.filter(lmax);
+				
+				ArrayRealVector topos = new ArrayRealVector(180*360/4);
+				int i = 0;
+				for (int lon = -180; lon < 180; lon +=2) {
+					for (int lat = -90; lat < 90; lat += 2) {
+						double topo = seismic3Dmodel.getCMBElevation(new HorizontalPosition(lat, lon));
+						topos.setEntry(i, topo);
+						i++;
+					}
+				}
+				System.out.println("Max topo: " + topos.getLInfNorm());
+				
+				for (String phaseName : phaseNames) {
+					String suffix = String.format("l%d_depth%.0f", lmax, min_depth);
+					compute_phase_differential_raypathinfo(rayinfo, seismic3Dmodel,
+							phaseRefName, phaseName, switchMantle, switchTopo, out_root, suffix);
+				}
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 }

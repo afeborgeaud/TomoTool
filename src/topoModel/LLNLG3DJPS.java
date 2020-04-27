@@ -210,4 +210,8 @@ public class LLNLG3DJPS implements Seismic3Dmodel {
 		pw.close();
 	}
 	
+	@Override
+	public String getName() {
+		return "llnlg3djps";
+	}
 }

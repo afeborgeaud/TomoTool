@@ -22,10 +22,23 @@ public class Sph_specfem {
 				y += coeffs.get(l).get(im) * ylm(l, m, phi, theta);
 			}
 		}
-		return y;
+		return -y;
 	}
 	
-	private static int im2m(int im) {
+	public static double eval(double phi, double theta, List<List<Double>> coeffs, int lmax) {
+		if (lmax > coeffs.size())
+			throw new RuntimeException("LMAX must be smaller than " + coeffs.size());
+		double y = 0;
+		for (int l = 0; l < lmax; l++) {
+			for (int im = 0; im < coeffs.get(l).size(); im++) {
+				int m = im2m(im);
+				y += coeffs.get(l).get(im) * ylm(l, m, phi, theta);
+			}
+		}
+		return -y;
+	}
+	
+	public static int im2m(int im) {
 		if (im == 0)
 			return 0;
 		else if (im % 2 == 1)
@@ -36,7 +49,7 @@ public class Sph_specfem {
 			return Integer.MAX_VALUE;
 	}
 	
-	private static final double xlm(int l, int m, double theta) {
+	public static final double xlm(int l, int m, double theta) {
 		if (m < 0 || m > l)
 			throw new RuntimeException("Invalid m");
 		double x = Math.cos(theta);

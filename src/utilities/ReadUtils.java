@@ -1,6 +1,7 @@
 package utilities;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -97,6 +98,32 @@ public class ReadUtils {
 		double lmax = 0;
 		List<Double> tmps = new ArrayList<>();
 		try {
+			lmax = Double.parseDouble(bufferedReader.readLine().trim());
+			String line = "";
+			while((line = bufferedReader.readLine()) != null) {
+				Arrays.stream(line.trim().split(" ")).forEach(s -> tmps.add(Double.parseDouble(s)));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		List<List<Double>> coeffs = new ArrayList<>();
+		int count = 0;
+		for (int l = 0; l < lmax + 1; l++) {
+			List<Double> cs = new ArrayList<Double>();
+			for (int m = 0; m < 2*l+1; m++) {
+				cs.add(tmps.get(count));
+				count++;
+			}
+			coeffs.add(cs);
+		}
+		return coeffs;
+	}
+	
+	public static List<List<Double>> readSphFile_specfem(String model_path) {
+		double lmax = 0;
+		List<Double> tmps = new ArrayList<>();
+		try (BufferedReader bufferedReader = 
+		            new BufferedReader(new FileReader(model_path))) {
 			lmax = Double.parseDouble(bufferedReader.readLine().trim());
 			String line = "";
 			while((line = bufferedReader.readLine()) != null) {

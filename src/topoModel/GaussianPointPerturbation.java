@@ -33,7 +33,7 @@ public class GaussianPointPerturbation implements Seismic3Dmodel {
 		GaussianPointPerturbation tk10 = new GaussianPointPerturbation();
 //		double dh = tk10.getCMBElevation(new HorizontalPosition(0, 0));
 //		System.out.println(dh);
-		Path outpath = Paths.get("gauss_ca_1000_8_20.dat");
+		Path outpath = Paths.get("gauss_ca_1000_8_40.ylm");
 		tk10.writeCMBElevationMap(outpath);
 	}
 	
@@ -99,5 +99,10 @@ public class GaussianPointPerturbation implements Seismic3Dmodel {
 	@Override
 	public void outputLayer(Path outputpath, double r) throws IOException {
 		
+	}
+	
+	@Override
+	public String getName() {
+		return "gauss";
 	}
 }
