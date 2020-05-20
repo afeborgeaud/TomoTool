@@ -1,5 +1,5 @@
 package raytheory;
 
 public enum WaveType {
-	P, S;
+	P, S, PS;
 }

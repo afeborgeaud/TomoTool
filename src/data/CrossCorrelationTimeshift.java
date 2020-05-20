@@ -50,17 +50,17 @@ public class CrossCorrelationTimeshift {
 			String modelName = args[3].trim();
 			System.out.println(String.format("Windows: %s, Phase: %s, ModelRef: %s, Model: %s", timewindowPath.getFileName(), phaseName, modelRefName, modelName));
 			
-			double timeBeforePeak = 20;
+			double timeBeforePeak = 20; //20
 			double timeAfterPeak = 20;
 			double minCc = 0.95;
-//			minCc = 0.8;
-//			minCc = 0.85;
-			minCc = -1;
+			minCc = 0.8;
+//			minCc = 0.9;
+//			minCc = -1;
 			
-//			List<TimewindowInformation> timewindows = readAndAlignTimewindows(timewindowPath, modelRefName, Paths.get(modelRefName),
-//					timeBeforePeak, timeAfterPeak, minCc);
+			List<TimewindowInformation> timewindows = readAndAlignTimewindows(timewindowPath, modelRefName, Paths.get(modelRefName),
+					timeBeforePeak, timeAfterPeak, minCc);
 			
-			List<TimewindowInformation> timewindows = TimewindowInformationFile.read(timewindowPath).stream().collect(Collectors.toList());
+//			List<TimewindowInformation> timewindows = TimewindowInformationFile.read(timewindowPath).stream().collect(Collectors.toList());
 			
 //			WaveformClustering clustering = new WaveformClustering(timewindows, Paths.get(modelRefName), 0.02);
 //			clustering.run();
@@ -268,13 +268,16 @@ public class CrossCorrelationTimeshift {
 		try {
 //			Seismic3Dmodel seismic3Dmodel = new GaussianPointPerturbation();
 //	
-		Seismic3Dmodel seismic3Dmodel = new TK10();
+			Seismic3Dmodel seismic3Dmodel = new TK10();
 			
 			List<raytheory.Measurement> rayMearuements = Compute.compute_phase(timewindows, seismic3Dmodel, phaseName);
 			
 			CrossCorrelationTimeshift ccShift = new CrossCorrelationTimeshift(timewindows
 					, obsPath, synPath, convolute);
 			List<Measurement> measurements = ccShift.calculate();
+			
+			if (rayMearuements.size() != measurements.size())
+				System.err.println("Warning: nums. of rays from ray tracing and cc differ (triplications?)");
 			
 			PrintWriter pw = new PrintWriter(outpath.toFile());
 			for (int i = 0; i < timewindows.size(); i++) {

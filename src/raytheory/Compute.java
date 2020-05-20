@@ -43,7 +43,7 @@ public class Compute {
 		
 //		compute_geodynamics_models(false, true);
 		
-		compute_geodynamics_models_diff(true, false, "SKKS", 20);
+//		compute_geodynamics_models_diff(true, false, "SKKS", 20);
 		
 //		compute_geodynamics_models_diff(false, true, "SKKS", 4);
 //		compute_geodynamics_models_diff(false, true, "SKKS", 20);
@@ -61,16 +61,27 @@ public class Compute {
 //		compute_geodynamics_models_diff(true, true, "SKKS");
 //		compute_geodynamics_models_diff(true, true, "ScS");
 		
-//		if (args.length == 0)
-//			Compute_SmKS();
-//		else if (args.length == 3) {
-//			Path timewindowPath = Paths.get(args[0]);
-//			String threeDmodel = args[1].trim().toLowerCase();
-//			String phase = args[2].trim();
-//			
-//			compute_phase(timewindowPath, threeDmodel, phase, false, true);
-//			compute_phase(timewindowPath, threeDmodel, phase, true, false);
-//		}
+		if (args.length == 0)
+			compute_geodynamics_models_diff(true, false, "SKKS", 20);
+		else if (args.length == 3) {
+			Path raypathInformationPath = Paths.get(args[0]);
+			String threeDmodel = args[1].trim().toLowerCase();
+			String phaseName = args[2].trim();
+			
+			List<RaypathInformation> raypathInformations = RaypathInformation.readRaypathInformation(raypathInformationPath);
+			Seismic3Dmodel seismic3Dmodel = parse3DModel(threeDmodel.toLowerCase());
+			String refModelName = "prem";
+			
+			List<Measurement> measurements_mantle = compute_phase_from_raypathinfo(raypathInformations,
+					seismic3Dmodel, refModelName, phaseName, true, false);
+			List<Measurement> measurements_topo = compute_phase_from_raypathinfo(raypathInformations,
+					seismic3Dmodel, refModelName, phaseName, false, true);
+			
+			Path outpath_mantle = Paths.get("dt_" + threeDmodel + "_" + "mantle" + "_" + phaseName + ".txt");
+			Path outpath_topo = Paths.get("dt_" + threeDmodel + "_" + "topo" + "_" + phaseName + ".txt");
+			writeMeasurements(outpath_mantle, measurements_mantle, phaseName);
+			writeMeasurements(outpath_topo, measurements_topo, phaseName);
+		}
 //		else if (args.length == 4) {
 //			Path timewindowPath = Paths.get(args[0]);
 //			String threeDmodel = args[1].trim().toLowerCase();
@@ -105,6 +116,49 @@ public class Compute {
 //			compute_phase_differential(timewindows, seismic3dmodel, phaseRef, phase, true, false);
 //		}
 		
+	}
+		
+	private static Seismic3Dmodel parse3DModel(String modelName) {
+		Seismic3Dmodel seismic3Dmodel = null;
+		switch (modelName) {
+		case "semucb":
+		case "semucbwm1":
+		case "semucb_wm1":
+			seismic3Dmodel = new SEMUCBWM1();
+			break;
+		case "llnlg3d":
+			seismic3Dmodel = new LLNLG3DJPS();
+			break;
+		case "tanaka10":
+		case "tk10":
+			seismic3Dmodel = new TK10();
+			break;
+		case "gauss":
+			seismic3Dmodel = new GaussianPointPerturbation();
+			break;
+		case "s20rts":
+			seismic3Dmodel = new S20RTS();
+			break;
+		default:
+			throw new RuntimeException("Error: 3D model " + modelName + " not implemented yet");
+		}
+		return seismic3Dmodel;
+	}
+	
+	private static void writeMeasurements(Path outpath, List<Measurement> measurements, String phaseName) {
+		try(PrintWriter pw = new PrintWriter(outpath.toFile())) {
+			for (Measurement m : measurements) {
+	//			double shift = -(mScS.getTraveltimePerturbation() - mS.getTraveltimePerturbation());
+				double shift = m.getTraveltimePerturbation();
+				
+				for (ScatterPoint p : m.getScatterPointList()) {
+					String tmpStr = String.format("%.5f", shift) + " " + p.getPosition() + " " + m.getEpicentralDistance() + " " + m.getAzimuth() + " " + p.getType();
+					pw.println(tmpStr);
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static void Compute_SmKS() throws IOException {
@@ -559,7 +613,6 @@ public class Compute {
 		List<String> outputStrs = new ArrayList<>();
 		
 		List<int[]> batches = create_batches((int) (1e4), raypathInformations.size());
-//		batches.stream().forEach(b -> System.out.println(b[0] + " " + b[1]));
 		
 //		for (int[] batch : batches) {
 		batches.parallelStream().forEach(batch -> {
@@ -594,11 +647,7 @@ public class Compute {
 					}
 				}
 				
-	//			double shift = -(mScS.getTraveltimePerturbation() - mS.getTraveltimePerturbation());
-	//			double shift = -(m.getTraveltimePerturbationToPREM() - mRef.getTraveltimePerturbationToPREM());
 				double shift = (m.getTraveltimePerturbationToPREM() - mRef.getTraveltimePerturbationToPREM());
-	//			if (mRef.getTraveltimePerturbationToPREM() != 0)
-	//				System.out.println(mRef.getTraveltimePerturbationToPREM());
 				
 				List<String> tmpStrs = new ArrayList<String>();
 				if (m.getPhaseName().equals("ScS")) {
@@ -615,14 +664,6 @@ public class Compute {
 						" " + m.getPhaseName();
 					tmpStrs.add(tmpStr);
 				}
-	//			else if (m.getPhaseName().equals("SKS") || m.getPhaseName().equals("SKSm")) {
-	//				for (ScatterPoint p : m.getScatterPointList()) {
-	//					String tmpStr = String.format("%.5f", shift) + " " + p.getPosition() +
-	//						" " + m.getEpicentralDistance() + " " + m.getAzimuth() + " " + p.getType() +
-	//						" " + m.getPhaseName();
-	//					tmpStrs.add(tmpStr);
-	//				}
-	//			}
 				
 				for (String tmpStr : tmpStrs)
 					outputStrs.add(tmpStr);
@@ -749,14 +790,25 @@ public class Compute {
 		return measurements;
 	}
 	
-	public static List<Measurement> compute_phase_raypathinfo(List<RaypathInformation> raypathInformations,
-			Seismic3Dmodel seismic3Dmodel, String phaseName) throws IOException {
-		String modelName = "prem";
+	
+	/**
+	 * Compute travel-time perturbations due to 3D mantle and CMB topography
+	 * @param raypathInformations list of raypaths information
+	 * @param seismic3Dmodel the 3D mantle + topo model to use for computation of travel time computations
+	 * @param refModelName the reference model for computation of raypaths ("prem" or "ak135")
+	 * @param phaseName the name of the seismic phase you want to compute (e.g. "ScS")
+	 * @param switchMantle if true, add the travel-time perturbations due to the 3D mantle
+	 * @param switchTopo if true, add the travel-time perturbations due to the CMB topography
+	 * @return measurements list of measurements objects that holds the travel-time perturbations
+	 */
+	public static List<Measurement> compute_phase_from_raypathinfo(
+			List<RaypathInformation> raypathInformations, Seismic3Dmodel seismic3Dmodel,
+			String refModelName, String phaseName,
+			boolean switchMantle, boolean switchTopo) {
+		Traveltime traveltimetool = new Traveltime(raypathInformations, refModelName, seismic3Dmodel, phaseName);
 		
-		Traveltime traveltimetool = new Traveltime(raypathInformations, modelName, seismic3Dmodel, phaseName);
-		
-		traveltimetool.setIgnoreMantle(true);
-		traveltimetool.setIgnoreCMBElevation(false);
+		traveltimetool.setIgnoreMantle(!switchMantle);
+		traveltimetool.setIgnoreCMBElevation(!switchTopo);
 		
 		traveltimetool.run();
 		List<List<Measurement>> measurements_tmp = traveltimetool.getMeasurements();
@@ -841,7 +893,8 @@ public class Compute {
 				System.out.println("Max topo: " + topos.getLInfNorm());
 				
 				for (String phaseName : phaseNames) {
-					List<Measurement> measurements = compute_phase_raypathinfo(rayinfo, seismic3Dmodel, phaseName);
+					List<Measurement> measurements = compute_phase_from_raypathinfo(rayinfo, seismic3Dmodel, "prem",
+							phaseName, switchMantle, switchTopo);
 					
 					Path outpath = out_root.resolve("dt_" + model_name + "_l" + lmax + "_depth" + min_depth + "_" + switchString + phaseName + ".dat");
 					PrintWriter pw = new PrintWriter(outpath.toFile());

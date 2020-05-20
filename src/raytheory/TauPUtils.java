@@ -76,8 +76,15 @@ public class TauPUtils {
 		boolean majorarc = false;
 		try {
 			timetool.calculate(distance);
+			List<Arrival> arrivals = timetool.getArrivals();
 			
-			for (Arrival arrival : timetool.getArrivals()) {
+			int count = 0;
+			for (Arrival arrival : arrivals) {
+				count++;
+				if (count > 1)
+					continue;
+			//TODO include the case of triplications
+//			for (Arrival arrival : timetool.getArrivals()) {
 				if (arrival.getDistDeg() > distance + 1.)
 					majorarc = true;
 				else
@@ -348,6 +355,11 @@ public class TauPUtils {
 			if (scatterPoints.size() != 1)
 				throw new RuntimeException("Unexpected number for " + phaseName + " " + scatterPoints.size());
 			scatterList.add(new ScatterPoint(scatterPoints.get(0), rayparam, ScatterType.reflection_top, WaveType.S));
+			break;
+		case "PcS":
+			if (scatterPoints.size() != 1)
+				throw new RuntimeException("Unexpected number for " + phaseName + " " + scatterPoints.size());
+			scatterList.add(new ScatterPoint(scatterPoints.get(0), rayparam, ScatterType.reflection_top, WaveType.PS));
 			break;
 		case "ScSScS":
 			if (scatterPoints.size() != 2)

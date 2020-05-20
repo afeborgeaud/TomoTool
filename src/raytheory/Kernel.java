@@ -29,15 +29,25 @@ public class Kernel {
 	}
 	
 	public double topReflection(double rayparam, WaveType wavetype) throws IllegalArgumentException {
-		double vMantle = 0;
-		if (wavetype.equals(WaveType.P))
-			vMantle = vpMantle;
-		else if (wavetype.equals(WaveType.S))
-			vMantle = vsMantle;
-		double tmp = core_radius * core_radius / (vMantle * vMantle) - rayparam * rayparam;
-		if (tmp < 0)
+		double vMantleDown = 0;
+		double vMantleUp = 0;
+		if (wavetype.equals(WaveType.P)) {
+			vMantleDown = vpMantle;
+			vMantleUp = vMantleDown;
+		}
+		else if (wavetype.equals(WaveType.S)) {
+			vMantleDown = vsMantle;
+			vMantleUp = vMantleDown;
+		}
+		else if (wavetype.equals(WaveType.PS)) {
+			vMantleDown = vpMantle;
+			vMantleUp = vsMantle;
+		}
+		double tmpDown = core_radius * core_radius / (vMantleDown * vMantleDown) - rayparam * rayparam;
+		double tmpUp = core_radius * core_radius / (vMantleUp * vMantleUp) - rayparam * rayparam;
+		if (tmpDown < 0 || tmpUp < 0)
 			throw new IllegalArgumentException("No solution for the input ray parameter and slowness");
-		return -2. / core_radius * Math.sqrt(tmp);
+		return -1 / core_radius * (Math.sqrt(tmpDown) + Math.sqrt(tmpUp));
 	}
 	
 	public double transmission(double rayparam, WaveType wavetype) throws IllegalArgumentException {

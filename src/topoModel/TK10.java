@@ -26,7 +26,7 @@ public class TK10 implements Seismic3Dmodel {
 	
 	private List<List<Double>> coeffs;
 	
-	private Seismic3Dmodel mantleModel = new SEMUCBWM1();
+	private Seismic3Dmodel mantleModel = new S20RTS();
 //	private Seismic3Dmodel mantleModel = new TestModel();
 	
 	public static void main(String[] args) throws IOException {

@@ -35,38 +35,6 @@ public class Traveltime {
 	private boolean ignoreMantle;
 	
 	private boolean ignoreCMBElevation;
-
-//	public Traveltime(Path stationFile, Path eventFile, String modelName, String topoModelName, String phaseList, double minDistance, double maxDistance) {
-//		try {
-//			stationSet = StationInformationFile.read(stationFile);
-//			eventSet = ReadUtils.readGlobalCMTIDFile(eventFile);
-//			this.modelName = modelName;
-//			this.phaseList = phaseList;
-//			this.measurements = new ArrayList<>();
-//			
-//			switch (modelName) {
-//			case "prem":
-//				structure = PolynomialStructure.PREM;
-//				break;
-//			case "ak135":
-//				structure = PolynomialStructure.AK135;
-//			default:
-//				throw new RuntimeException("Model not implemented yet " + modelName);
-//			}
-//			
-//			switch (topoModelName) {
-//			case "sh18cex":
-//				seismic3Dmodel = new SH18CEX();
-//				break;
-//			default:
-//				throw new RuntimeException("Model  not implemented  yet " + modelName);
-//			}
-//			
-//			kernel = new Kernel(structure);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
 	
 	public Traveltime(List<RaypathInformation> raypathInformations, String modelName, Seismic3Dmodel seismic3Dmodel, String phaseList) {
 		this.raypathInformations = raypathInformations;
@@ -108,7 +76,7 @@ public class Traveltime {
 	
 	public void run() {
 		measurements.clear();
-		System.out.println("Going for " + raypathInformations.size() + " raypaths");
+		System.out.println("Computing " + raypathInformations.size() + " raypaths");
 		
 		AtomicInteger count = new AtomicInteger();
 		TauPUtils taupUtils = new TauPUtils(modelName);
@@ -298,6 +266,31 @@ public class Traveltime {
 			if (loc2.getR() >= 3480 && r2 < 3480) r2 = 3480;
 			//
 			if (r1 < 3480. && r1 >= 1221.5) {
+				times[0] = -l / (seismic3Dmodel.getVp(r1) + seismic3Dmodel.getVp(r2)) * (seismic3Dmodel.getdlnVp(loc1.toLocation(r1)) + seismic3Dmodel.getdlnVp(loc2.toLocation(r2)));
+				times[1] = 2 * l / (seismic3Dmodel.getVp(r1) + seismic3Dmodel.getVp(r2));
+				times[2] = 2 * l / (PolynomialStructure.ISO_PREM.getVphAt(r1) + PolynomialStructure.ISO_PREM.getVphAt(r2));
+			}
+			else {
+				times[0] = -l / (seismic3Dmodel.getVs(r1) + seismic3Dmodel.getVs(r2)) * (seismic3Dmodel.getdlnVs(loc1.toLocation(r1)) + seismic3Dmodel.getdlnVs(loc2.toLocation(r2)));
+				times[1] = 2 * l / (seismic3Dmodel.getVs(r1) + seismic3Dmodel.getVs(r2));
+				times[2] = 2 * l / (PolynomialStructure.ISO_PREM.getVshAt(r1) + PolynomialStructure.ISO_PREM.getVshAt(r2));
+			}
+		}
+		else if (phaseName.equals("PcS")) {
+			double r1, r2;
+			if (loc1.getR() > loc2.getR()) {
+				r1 = loc1.getR() - 1e-7;
+				r2 = loc2.getR() + 1e-7;
+			}
+			else {
+				r1 = loc1.getR() + 1e-7;
+				r2 = loc2.getR() - 1e-7;
+			}
+			//fix
+			if (loc1.getR() >= 3480 && r1 < 3480) r1 = 3480;
+			if (loc2.getR() >= 3480 && r2 < 3480) r2 = 3480;
+			//
+			if (r1 < r2) {
 				times[0] = -l / (seismic3Dmodel.getVp(r1) + seismic3Dmodel.getVp(r2)) * (seismic3Dmodel.getdlnVp(loc1.toLocation(r1)) + seismic3Dmodel.getdlnVp(loc2.toLocation(r2)));
 				times[1] = 2 * l / (seismic3Dmodel.getVp(r1) + seismic3Dmodel.getVp(r2));
 				times[2] = 2 * l / (PolynomialStructure.ISO_PREM.getVphAt(r1) + PolynomialStructure.ISO_PREM.getVphAt(r2));
