@@ -1,7 +1,7 @@
 # TomoTool
 
 Java tools for computation of travel-time perturbations due to the CMB topography.<br>
-DISCLAMER: these tools are not yet fully intended for general usage
+DISCLAMER: these tools are not yet fully intended for general usage (lack of documentation, lack of user-friendly interface), but a simple usage for computing travel-time perturbations from an input raypath information file is described bellow
 
 ## Installation
 - Dowload tomoTool.jar file (located in bin/) to your local machine
