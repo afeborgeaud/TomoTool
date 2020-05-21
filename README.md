@@ -6,12 +6,12 @@ DISCLAMER: these tools are not yet fully intended for general usage (lack of doc
 ## Dependenciejfreechars
 - jfreechart
 - jcommon
-- commons io
-- commons math
-- commons lang
-- commons cli
-- commons net
-- commons email
+- Apache Commons io
+- Apache Commons Math
+- Apache Commons Lang
+- Apache Commons cli
+- Apache Commons net
+- Apache Commons email
 - javax.mail
 - activation
 
