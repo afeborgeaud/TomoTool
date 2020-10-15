@@ -21,6 +21,7 @@ The outputs are ```bouncepointPcP.dat``` (travel-time perturbations at PcP bounc
 - semucb (SEMUCB-WM1; French and Romanowicz 2014)
 - llnlg3d (LLNLG3DJPS; )
 - s20rts (S20RTS & SP12; Ritsema et al. 2000)
+Note: path to a Kibrary TimewindowInformationFile binary file can also be used instead of ```raypath_information.txt```.
 
 ### Computation of travel-time perturbations due to CMB topo and 3-D mantle
 You can compute travel-time perturbations for topo and mantle for the model tk10 (Tanaka, 2010) for the ScS phase using
