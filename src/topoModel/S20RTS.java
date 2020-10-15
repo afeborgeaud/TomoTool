@@ -340,71 +340,77 @@ public class S20RTS implements Seismic3Dmodel {
 	private int NLMAX = 20;
 	
 	private void read_model_s20rts() {
-		  S20RTS_V_dvs_a = new double[nk_20 + 1][ns_20 + 1][ns_20 + 1];
-		  S20RTS_V_dvs_b = new double[nk_20 + 1][ns_20 + 1][ns_20 + 1];
-		  S20RTS_V_dvp_a = new double[nk_20 + 1][ns_20 + 1][ns_20 + 1];
-		  S20RTS_V_dvp_b = new double[nk_20 + 1][ns_20 + 1][ns_20 + 1];
+		System.out.println("Loading model S20RTS");
+		S20RTS_V_dvs_a = new double[nk_20 + 1][ns_20 + 1][ns_20 + 1];
+		S20RTS_V_dvs_b = new double[nk_20 + 1][ns_20 + 1][ns_20 + 1];
+		S20RTS_V_dvp_a = new double[nk_20 + 1][ns_20 + 1][ns_20 + 1];
+		S20RTS_V_dvp_b = new double[nk_20 + 1][ns_20 + 1][ns_20 + 1];
 
-		  String S20RTS_ = "/resources/S20RTS.dat";
-		  String P12_ = "/resources/P12.dat";
+		//TODO
+	  // for non-runnable JAR files
+//		  String S20RTS_ = "/resources/S20RTS.dat";
+//		  String P12_ = "/resources/P12.dat";
+	  // for runnable JAR files
+	  String S20RTS_ = "/S20RTS.dat";
+	  String P12_ = "/P12.dat";
+	  
+	  String line;
+	  
+	  try {
+		 //S20RTS degree 20 S model from Ritsema
+		  BufferedReader bufferedReader = 
+		            new BufferedReader(new InputStreamReader(S20RTS.class.getResourceAsStream(S20RTS_)));
 		  
-		  String line;
-		  
-		  try {
-			 //S20RTS degree 20 S model from Ritsema
-			  BufferedReader bufferedReader = 
-			            new BufferedReader(new InputStreamReader(S20RTS.class.getResourceAsStream(S20RTS_)));
-			  
-			  List<Double> coeffs = new ArrayList<>();
-			  while((line = bufferedReader.readLine()) != null) {
-					Arrays.stream(line.trim().split("\\s+")).forEach(s -> coeffs.add(Double.parseDouble(s)));
-			  }
-			  int i = 0;
-			  for (int k = 0; k < nk_20 + 1; k++) {
-				  int l = 0;
-				  int j = 0;
-				  do {
-					  S20RTS_V_dvs_a[k][l][0] = coeffs.get(i++);
-					  j++;
-					  for (int m = 1; m < l + 1; m++) {
-						  S20RTS_V_dvs_a[k][l][m] = coeffs.get(i++);
-						  S20RTS_V_dvs_b[k][l][m] = coeffs.get(i++);
-						  j += 2;
-					  }
-					  l++;
-				  } while (j < (ns_20 + 1) * (ns_20 + 1));
-			  }
-			  
-	
-			 //P12 degree 12 P model from Ritsema
-			  bufferedReader = 
-			            new BufferedReader(new InputStreamReader(S20RTS.class.getResourceAsStream(P12_)));
-			  
-			  List<Double> coeffsP = new ArrayList<>();
-			  while((line = bufferedReader.readLine()) != null) {
-					Arrays.stream(line.trim().split("\\s+")).forEach(s -> coeffsP.add(Double.parseDouble(s)));
-			  }
-			  i = 0;
-			  for (int k = 0; k < nk_20 + 1; k++) {
-				  int l = 0;
-				  int j = 0;
-				  do {
-					  S20RTS_V_dvp_a[k][l][0] = coeffs.get(i++);
-					  j++;
-					  for (int m = 1; m < l + 1; m++) {
-						  S20RTS_V_dvp_a[k][l][m] = coeffs.get(i++);
-						  S20RTS_V_dvp_b[k][l][m] = coeffs.get(i++);
-						  j += 2;
-					  }
-					  l++;
-				  } while (j < (ns_20 + 1) * (ns_20 + 1));
-			  }
-		  } catch (IOException e) {
-			  e.printStackTrace();
+		  List<Double> coeffs = new ArrayList<>();
+		  while((line = bufferedReader.readLine()) != null) {
+				Arrays.stream(line.trim().split("\\s+")).forEach(s -> coeffs.add(Double.parseDouble(s)));
 		  }
+		  int i = 0;
+		  for (int k = 0; k < nk_20 + 1; k++) {
+			  int l = 0;
+			  int j = 0;
+			  do {
+				  S20RTS_V_dvs_a[k][l][0] = coeffs.get(i++);
+				  j++;
+				  for (int m = 1; m < l + 1; m++) {
+					  S20RTS_V_dvs_a[k][l][m] = coeffs.get(i++);
+					  S20RTS_V_dvs_b[k][l][m] = coeffs.get(i++);
+					  j += 2;
+				  }
+				  l++;
+			  } while (j < (ns_20 + 1) * (ns_20 + 1));
+		  }
+		  
 
-		 //set up the splines used as radial basis functions by Ritsema
-		 s20rts_splhsetup();
+		 //P12 degree 12 P model from Ritsema
+		  bufferedReader = 
+		            new BufferedReader(new InputStreamReader(S20RTS.class.getResourceAsStream(P12_)));
+		  
+		  List<Double> coeffsP = new ArrayList<>();
+		  while((line = bufferedReader.readLine()) != null) {
+				Arrays.stream(line.trim().split("\\s+")).forEach(s -> coeffsP.add(Double.parseDouble(s)));
+		  }
+		  i = 0;
+		  for (int k = 0; k < nk_20 + 1; k++) {
+			  int l = 0;
+			  int j = 0;
+			  do {
+				  S20RTS_V_dvp_a[k][l][0] = coeffs.get(i++);
+				  j++;
+				  for (int m = 1; m < l + 1; m++) {
+					  S20RTS_V_dvp_a[k][l][m] = coeffs.get(i++);
+					  S20RTS_V_dvp_b[k][l][m] = coeffs.get(i++);
+					  j += 2;
+				  }
+				  l++;
+			  } while (j < (ns_20 + 1) * (ns_20 + 1));
+		  }
+	  } catch (IOException e) {
+		  e.printStackTrace();
+	  }
+
+	  //set up the splines used as radial basis functions by Ritsema
+	  s20rts_splhsetup();
 	}
 	
 	private double[] mantle_s20rts_fromLoc(Location loc) {

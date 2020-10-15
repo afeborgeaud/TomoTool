@@ -49,7 +49,11 @@ public class GaussianPointPerturbation implements Seismic3Dmodel {
 //			e.printStackTrace();
 //		}
 		
-		coeffs = ReadUtils.readSphFile_specfem(GaussianPointPerturbation.class.getResourceAsStream("/resources/gauss_ca_1000_8_20.ylm"));
+		//TODO
+//		String GAUSS_ = "/resources/gauss_ca_1000_8_20.ylm"; // for non-runnable JAR files
+		String GAUSS_ = "/gauss_ca_1000_8_20.ylm"; // for runnable JAR files
+		coeffs = ReadUtils.readSphFile_specfem(
+				GaussianPointPerturbation.class.getResourceAsStream(GAUSS_));
 	}
 	
 	public double getCMBElevation(HorizontalPosition position) {

@@ -57,7 +57,8 @@ public class SEMUCBWM1 implements Seismic3Dmodel {
 	public SEMUCBWM1() {
 		System.out.println("Loading model SEMUCBWM1");
 		try {
-			InputStream is = SEMUCBWM1.class.getResourceAsStream("/resources/model_semucb_wholemantle.dat");
+//			InputStream is = SEMUCBWM1.class.getResourceAsStream("/resources/model_semucb_wholemantle.dat"); // for non-runnable JAR files
+			InputStream is = SEMUCBWM1.class.getResourceAsStream("/model_semucb_wholemantle.dat"); // for runnable JAR files
 			BufferedReader bufferedReader = 
 			            new BufferedReader(new InputStreamReader(is));
 			

@@ -54,13 +54,15 @@ public class LLNLG3DJPS implements Seismic3Dmodel {
 		rmax = 6371.;
 		
 		try {
-//			InputStream is = LLNLG3DJPS.class.getResourceAsStream("/resources/model_llnl3djps_wholemantle.dat");
-//			BufferedReader bufferedReader = 
-//			            new BufferedReader(new InputStreamReader(is));
+			//TODO
+//			InputStream is = LLNLG3DJPS.class.getResourceAsStream("/resources/model_llnl3djps_wholemantle.dat"); // for non-runnable JAR files
+			InputStream is = LLNLG3DJPS.class.getResourceAsStream("/model_llnl3djps_wholemantle.dat"); // for runnable JAR files
+			BufferedReader bufferedReader = 
+			            new BufferedReader(new InputStreamReader(is));
 			
-			Path resourcePath =  new File("resources").getAbsoluteFile().toPath();
-			Path modelPath = Paths.get("/home/navy/git/TopoCMB/resources/model_llnl3djps_wholemantle.dat");
-			BufferedReader bufferedReader = Files.newBufferedReader(modelPath);
+//			Path resourcePath =  new File("resources").getAbsoluteFile().toPath();
+//			Path modelPath = Paths.get("/home/navy/git/TopoCMB/resources/model_llnl3djps_wholemantle.dat");
+//			BufferedReader bufferedReader = Files.newBufferedReader(modelPath);
 			
 			String[] ss = bufferedReader.readLine().trim().split("\\s+");
 			nlon = Integer.parseInt(ss[1]);

@@ -49,7 +49,10 @@ public class TK10 implements Seismic3Dmodel {
 //			e.printStackTrace();
 //		}
 		
-		coeffs = ReadUtils.readSphFile(TK10.class.getResourceAsStream("/resources/tanaka10_lon.sph"));
+		// TODO
+//		String TK10 = "/resources/tanaka10_lon.sph"; // for non-runnable JAR files
+		String TK10 = "/tanaka10_lon.sph"; // for runnable JAR files
+		coeffs = ReadUtils.readSphFile(TK10.class.getResourceAsStream(TK10));
 	}
 	
 	public double getCMBElevation(HorizontalPosition position) {
