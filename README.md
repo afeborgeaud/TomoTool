@@ -1,9 +1,9 @@
 # TomoTool
-Java tools for computation of travel-time perturbations due to the CMB topography and 3-D mantle.<br>
-DISCLAMER: these tools are not yet fully intended for general usage (lack of documentation, lack of user-friendly interface), but simple usages for computing travel-time perturbations from an input raypath information file are given bellow.
+Java tools for computation of travel-time perturbations due to the Earth's core-mantle boundary topography and 3-D mantle. TomoTool uses several classes from the seismic waveform inversion tool [Kibrary](https://github.com/kensuke1984/Kibrary).<br><br>
+DISCLAMER: TomoTool is not yet intended for general usage (lack of documentation, lack of user-friendly interface), but simple usages for computing travel-time perturbations from an input raypath information file are given bellow.
 
 ## INSTALLATION
-1. Download [tomoTool.jar](https://www.dropbox.com/sh/03ksrnmnr5zbh02/AADj0Lli8DRbfyxkf3kfZBfQa?dl=0)
+1. Download [tomoTool.jar](https://www.dropbox.com/s/r6l2npi2vnry0xf/tomoTool.jar?dl=0)
 2. Add ```tomoTool.jar``` to your CLASSPATH (in ~/.bashrc)
 ```bash
 export CLASSPATH=$CLASSPATH:path/to/tomoTool.jar
