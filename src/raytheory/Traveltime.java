@@ -97,6 +97,8 @@ public class Traveltime {
 //			Map<String, List<ScatterPoint>> scatterPointMap = taupUtils.getScatterPointMap();
 //			Map<String, Location[]> raypathMap = taupUtils.getRaypathMap();
 			
+			double distance = raypathInformation.getDistanceDegree();
+			
 			List<Ray> rays = taupUtils.getRays();
 			
 			double dH = 0.;
@@ -145,12 +147,13 @@ public class Traveltime {
 			}
 			measurements.add(thisRecordList);
 		
-			int step = Math.max(1, raypathInformations.size() / 20);
+			int step = Math.max(1, raypathInformations.size() / 10);
 			if (count.incrementAndGet() % step == 0)
-				System.err.println(count.get() * 5 / step + " %");
+				System.err.print(count.get() * 10 / step + "%...");
 //		});
 		}
 		
+		System.out.println();
 		System.out.println("Run finished!");
 	}
 	

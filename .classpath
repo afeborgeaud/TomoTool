@@ -25,7 +25,6 @@
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.21.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-log4j12-1.7.21.jar"/>
 	<classpathentry kind="lib" path="lib/TauP-2.4.5.jar"/>
-	<classpathentry kind="lib" path="lib/tomoTool.jar"/>
 	<classpathentry kind="lib" path="lib/elki-bundle-0.7.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

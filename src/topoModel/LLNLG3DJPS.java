@@ -69,8 +69,6 @@ public class LLNLG3DJPS implements Seismic3Dmodel {
 			ss = bufferedReader.readLine().trim().split("\\s+");
 			ndepth = Integer.parseInt(ss[1]);
 			
-			System.out.println(nlon + " " + nlat + " " + ndepth);
-			
 			modeldlnvpvs = new double[ndepth][nlon][nlat][2];
 			
 			depths = new double[ndepth];

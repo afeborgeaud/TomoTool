@@ -62,7 +62,7 @@ public class SEMUCBWM1 implements Seismic3Dmodel {
 			            new BufferedReader(new InputStreamReader(is));
 			
 //			Path resourcePath =  new File("resources").getAbsoluteFile().toPath();
-//			Path modelPath = Paths.get("/mnt/doremi/anpan/java/lib/model_semucb_wholemantle.dat");
+//			Path modelPath = resourcePath.resolve("model_semucb_wholemantle.dat");
 //			BufferedReader bufferedReader = Files.newBufferedReader(modelPath);
 	        
 			rmin = 0.;
@@ -76,8 +76,6 @@ public class SEMUCBWM1 implements Seismic3Dmodel {
 			nlat = Integer.parseInt(ss[1]);
 			ss = bufferedReader.readLine().trim().split("\\s+");
 			ndepth = Integer.parseInt(ss[1]);
-			
-			System.out.println(nlon + " " + nlat + " " + ndepth);
 			
 			modeldlnvs = new double[ndepth][nlon][nlat];
 			depths = new double[ndepth];

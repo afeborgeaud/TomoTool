@@ -23,6 +23,7 @@ import io.github.kensuke1984.kibrary.util.Station;
 import io.github.kensuke1984.kibrary.util.globalcmt.GlobalCMTID;
 import io.github.kensuke1984.kibrary.util.sac.SACComponent;
 import topoModel.LLNLG3DJPS;
+import topoModel.S20RTS;
 import topoModel.SEMUCBWM1;
 import topoModel.Seismic3Dmodel;
 import topoModel.TK10;
@@ -72,6 +73,9 @@ public class ComputeCorrection {
 		case "llnlg3d":
 			seismic3Dmodel = new LLNLG3DJPS();
 			break;
+		case "s20rts":
+			seismic3Dmodel = new S20RTS();
+			break;
 		default:
 			throw new RuntimeException("Error: 3D model " + threeDmodel + " not implemented yet");
 		}
@@ -97,10 +101,7 @@ public class ComputeCorrection {
 		for (List<Measurement> record : measurements) {
 //		measurements.stream().parallel().forEach(record -> {
 			Set<String> phases = record.stream().map(p -> p.getPhaseName()).collect(Collectors.toSet());
-			if (!(phases.contains("PcP") && phases.contains("P"))) {
-				System.err.println(record);
-				return;
-			}
+			if (!(phases.contains("PcP") && phases.contains("P"))) continue;
 			Measurement mP = null;
 			Measurement mPcP = null;
 			for (Measurement m : record) {
@@ -144,6 +145,9 @@ public class ComputeCorrection {
 			break;
 		case "llnlg3d":
 			seismic3Dmodel = new LLNLG3DJPS();
+			break;
+		case "s20rts":
+			seismic3Dmodel = new S20RTS();
 			break;
 		default:
 			throw new RuntimeException("Error: 3D model " + threeDmodel + " not implemented yet");

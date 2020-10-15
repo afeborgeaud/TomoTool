@@ -4,11 +4,14 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import edu.sc.seis.TauP.Arrival;
+import edu.sc.seis.TauP.SeismicPhase;
 import edu.sc.seis.TauP.SphericalCoords;
 import edu.sc.seis.TauP.TauModel;
 import edu.sc.seis.TauP.TauModelException;
@@ -73,16 +76,20 @@ public class TauPUtils {
 		
 		rays = new ArrayList<TauPUtils.Ray>();
 		
+		Set<SeismicPhase> processedPhases = new HashSet<>();
+		
 		boolean majorarc = false;
 		try {
 			timetool.calculate(distance);
 			List<Arrival> arrivals = timetool.getArrivals();
 			
-			int count = 0;
+//			int count = 0;
 			for (Arrival arrival : arrivals) {
-				count++;
-				if (count > 1)
-					continue;
+				if (processedPhases.contains(arrival.getPhase())) continue;
+				processedPhases.add(arrival.getPhase());
+//				count++;
+//				if (count > 1)
+//					continue;
 			//TODO include the case of triplications
 //			for (Arrival arrival : timetool.getArrivals()) {
 				if (arrival.getDistDeg() > distance + 1.)
