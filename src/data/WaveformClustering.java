@@ -212,7 +212,7 @@ public class WaveformClustering {
 	private void setWaveforms(List<TimewindowInformation> timewindows, Path sacpath) {
 		for (int i = 0; i < timewindows.size(); i++) {
 			TimewindowInformation window = timewindows.get(i);
-			String sacnameString = window.getGlobalCMTID() + "/" + window.getStation().getStationName() + "." + window.getGlobalCMTID() 
+			String sacnameString = window.getGlobalCMTID() + "/" + window.getStation().getName() + "." + window.getGlobalCMTID() 
 				+ "." + window.getComponent() + "sc";
 			Path syn = sacpath.resolve(sacnameString);
 			try {

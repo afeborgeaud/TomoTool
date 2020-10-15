@@ -167,7 +167,7 @@ public class AlignWindows {
 			
 			for (int i = 0; i < eventTimewindows.size(); i++) {
 				TimewindowInformation window = eventTimewindows.get(i);
-				String sacnameString = window.getGlobalCMTID() + "/" + window.getStation().getStationName() + "." + window.getGlobalCMTID() 
+				String sacnameString = window.getGlobalCMTID() + "/" + window.getStation().getName() + "." + window.getGlobalCMTID() 
 					+ "." + window.getComponent() + "sc";
 				Path syn = sacpath.resolve(sacnameString);
 				try {
@@ -197,7 +197,7 @@ public class AlignWindows {
 			
 			for (int i = 0; i < eventTimewindows.size(); i++) {
 				TimewindowInformation window = eventTimewindows.get(i);
-				String sacnameString = window.getGlobalCMTID() + "/" + window.getStation().getStationName() + "." + window.getGlobalCMTID() 
+				String sacnameString = window.getGlobalCMTID() + "/" + window.getStation().getName() + "." + window.getGlobalCMTID() 
 					+ "." + window.getComponent() + "sc";
 				Path syn = sacpath.resolve(sacnameString);
 				try {
@@ -222,7 +222,7 @@ public class AlignWindows {
 			
 			for (int i = 0; i < eventTimewindows.size(); i++) {
 				TimewindowInformation window = eventTimewindows.get(i);
-				String sacnameString = window.getGlobalCMTID() + "/" + window.getStation().getStationName() + "." + window.getGlobalCMTID() 
+				String sacnameString = window.getGlobalCMTID() + "/" + window.getStation().getName() + "." + window.getGlobalCMTID() 
 					+ "." + window.getComponent() + "sc";
 				Path syn = sacpath.resolve(sacnameString);
 				try {
@@ -253,7 +253,7 @@ public class AlignWindows {
 			
 			for (int i = 0; i < eventTimewindows.size(); i++) {
 				TimewindowInformation window = eventTimewindows.get(i);
-				String sacnameString = window.getGlobalCMTID() + "/" + window.getStation().getStationName() + "." + window.getGlobalCMTID() 
+				String sacnameString = window.getGlobalCMTID() + "/" + window.getStation().getName() + "." + window.getGlobalCMTID() 
 					+ "." + window.getComponent() + "sc";
 				Path syn = sacpath.resolve(sacnameString);
 				try {
@@ -311,7 +311,7 @@ public class AlignWindows {
 		
 		for (int i = 0; i < timewindows.size(); i++) {
 			TimewindowInformation window = timewindows.get(i);
-			String sacnameString = window.getGlobalCMTID() + "/" + window.getStation().getStationName() + "." + window.getGlobalCMTID() 
+			String sacnameString = window.getGlobalCMTID() + "/" + window.getStation().getName() + "." + window.getGlobalCMTID() 
 				+ "." + window.getComponent() + "sc";
 			Path syn = sacpath.resolve(sacnameString);
 			
@@ -352,7 +352,7 @@ public class AlignWindows {
 	private void computePhase2AlignTimewindows() {
 		for (int i = 0; i < alignedTimewindows.size(); i++) {
 			TimewindowInformation window = alignedTimewindows.get(i);
-			String sacnameString = window.getGlobalCMTID() + "/" + window.getStation().getStationName() + "." + window.getGlobalCMTID() 
+			String sacnameString = window.getGlobalCMTID() + "/" + window.getStation().getName() + "." + window.getGlobalCMTID() 
 				+ "." + window.getComponent() + "sc";
 			Path syn = sacpath.resolve(sacnameString);
 			

@@ -85,13 +85,13 @@ public class RaypathInformation {
 //				r.getStation().getStationName() 
 //				+ " " + r.getStation().getNetwork() + " " + r.getStation().getPosition()));
 		rays.stream().forEach(r -> pw.println(r.getEvent() + " " +
-				r.getStation().getStationName() 
+				r.getStation().getName() 
 				+ " " + r.getStation().getNetwork() + " " + r.getStation().getPosition()));
 		pw.close();
 	}
 	
 	@Override
 	public String toString() {
-		return station.getStationName() + " " + event;
+		return station.getName() + " " + event;
 	}
 }

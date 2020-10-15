@@ -93,7 +93,7 @@ public class CrossCorrelationTimeshift {
 		synNames = new ArrayList<>();
 		this.timewindows = timewindows;
 		for (TimewindowInformation window : timewindows) {
-			String obsString = window.getGlobalCMTID() + "/" + window.getStation().getStationName() + "." + window.getGlobalCMTID() 
+			String obsString = window.getGlobalCMTID() + "/" + window.getStation().getName() + "." + window.getGlobalCMTID() 
 				+ "." + window.getComponent() + "sc";
 //			String synString = obsString + "s";
 //			if (convolute) synString += "c";
@@ -288,7 +288,7 @@ public class CrossCorrelationTimeshift {
 				pw.println(mRay.getTraveltimePerturbation() + " " + -m.getTimeshift() 
 					+ " " + m.getAmplitudeRatio() + " " + m.getCrosscorrelationAtBestShift()
 					+ " " + mRay.getEpicentralDistance()
-					+ " " + point.getPosition() + " " + mRay.getPhaseName() + " " + mRay.getStation().getStationName() + " " + mRay.getGlobalCMTID());
+					+ " " + point.getPosition() + " " + mRay.getPhaseName() + " " + mRay.getStation().getName() + " " + mRay.getGlobalCMTID());
 				} catch (NullPointerException e) {
 					System.err.println("Problems with " + timewindows.get(i) + " " + rayMearuements.get(i).getEpicentralDistance());
 					continue;
@@ -323,7 +323,7 @@ public class CrossCorrelationTimeshift {
 				pw.println(-m.getTimeshift() 
 					+ " " + m.getAmplitudeRatio() + " " + m.getCrosscorrelationAtBestShift() + " "
 					+ timewindows.get(i).getDistanceDegree() + " " + timewindows.get(i).getAzimuthDegree()
-					+ " " + timewindows.get(i).getStation().getStationName() + " " + timewindows.get(i).getGlobalCMTID());
+					+ " " + timewindows.get(i).getStation().getName() + " " + timewindows.get(i).getGlobalCMTID());
 			}
 			pw.close();
 			

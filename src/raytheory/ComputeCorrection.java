@@ -31,40 +31,37 @@ import utilities.ReadUtils;
 public class ComputeCorrection {
 
 	public static void main(String[] args) throws IOException {
-		Path timewindowPath = Paths.get(args[0]);
-//		Path timewindowPath = Paths.get("/work/anselme/CA_ANEL_NEW/syntheticPREM/filtered_stf_12.5-200s/timewindow_additional.dat");
-		
+		Path inputPath = Paths.get(args[0]);
 		String threeDmodel = args[1].trim().toLowerCase();
-		
 		String phase = args[2].trim().toLowerCase();
+		
+		List<RaypathInformation> raypathInformations;
+		try {
+			raypathInformations = RaypathInformation.readRaypathFromTimewindows(inputPath);
+		} catch (Exception e) {
+			raypathInformations = RaypathInformation.readRaypathInformation(inputPath);
+		}
+		
 		if (phase.equals("pcp")) {
 			System.out.println("Compute PcP");
-			Compute_PcP(timewindowPath, threeDmodel);
+			Compute_PcP(raypathInformations, threeDmodel);
 		}
 		else if (phase.equals("scs")) {
 			System.out.println("Compute ScS");
-			Compute_ScS(timewindowPath, threeDmodel);
+			Compute_ScS(raypathInformations, threeDmodel);
 		}
 		else if (phase.equals("test")) {
 			System.out.println("test");
 			try {
-				test(timewindowPath);
+				test(raypathInformations);
 			} catch (TauModelException e) {
 				e.printStackTrace();
 			}
 		}
 		
-		
 	}
 	
-	public static void Compute_PcP(Path timewindowPath, String threeDmodel) throws IOException {
-		Set<TimewindowInformation> timewindows = TimewindowInformationFile.read(timewindowPath);
-		
-		//Select raypaths
-		List<RaypathInformation> raypathInformations = timewindows.stream()
-				.map(tw -> new RaypathInformation(tw.getStation(), tw.getGlobalCMTID()))
-				.collect(Collectors.toList());
-		
+	public static void Compute_PcP(List<RaypathInformation> raypathInformations, String threeDmodel) throws IOException {
 		String modelName = "prem";
 		
 		Seismic3Dmodel seismic3Dmodel = null;
@@ -137,14 +134,7 @@ public class ComputeCorrection {
 		StaticCorrectionFile.write(corrections, outpath);
 	}
 	
-	public static void Compute_ScS(Path timewindowPath, String threeDmodel) throws IOException {
-		Set<TimewindowInformation> timewindows = TimewindowInformationFile.read(timewindowPath);
-		
-		//Select raypaths
-		List<RaypathInformation> raypathInformations = timewindows.stream()
-				.map(tw -> new RaypathInformation(tw.getStation(), tw.getGlobalCMTID()))
-				.collect(Collectors.toList());
-		
+	public static void Compute_ScS(List<RaypathInformation> raypathInformations, String threeDmodel) throws IOException {
 		String modelName = "prem";
 		
 		Seismic3Dmodel seismic3Dmodel = null;
@@ -211,15 +201,7 @@ public class ComputeCorrection {
 		StaticCorrectionFile.write(corrections, outpath);
 	}
 	
-	public static void test(Path timewindowPath) throws IOException, TauModelException {
-		Set<TimewindowInformation> timewindows = TimewindowInformationFile.read(timewindowPath);
-		timewindows = timewindows.stream().limit(10).collect(Collectors.toSet());
-		
-		//Select raypaths
-		List<RaypathInformation> raypathInformations = timewindows.stream()
-				.map(tw -> new RaypathInformation(tw.getStation(), tw.getGlobalCMTID()))
-				.collect(Collectors.toList());
-		
+	public static void test(List<RaypathInformation> raypathInformations) throws IOException, TauModelException {
 		String modelName = "prem";
 		
 		Seismic3Dmodel seismic3Dmodel = new SEMUCBWM1();
