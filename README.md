@@ -19,8 +19,8 @@ java raytheory.ComputeCorrection raypath_informations.txt semucb pcp
 ```
 Note: path to a Kibrary TimewindowInformationFile binary file can also be used instead of ```raypath_information.txt```.<br>
 The outputs are ```bouncepointPcP.dat``` (travel-time perturbations at PcP bouncing points) and ```mantleCorrection_P-PcP.dat``` (a binary kibrary StaticCorrectionFile). Currently, the following 3-D models are available:
-- semucb (SEMUCB-WM1; French and Romanowicz 2014)
-- llnlg3d (LLNLG3DJPS; )
+- semucb (SEMUCB-WM1; [French and Romanowicz 2014](https://academic.oup.com/gji/article/199/3/1303/612270))
+- llnlg3d (LLNLG3DJPS; [Simmons et al. 2012](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2012JB009525))
 - s20rts (S20RTS & SP12; Ritsema et al. 2000)
 
 ### Computation of travel-time perturbations due to CMB topo and 3-D mantle
