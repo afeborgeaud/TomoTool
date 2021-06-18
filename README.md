@@ -9,8 +9,12 @@ DISCLAMER: TomoTool is not yet intended for general usage (lack of documentation
 brew install maven
 ````
 2. Clone the TomoTool respository to your local machine
-3. Build TomoTool using Maven
+```bash
+git clone git@github.com:afeborgeaud/TomoTool.git
 ```
+4. Change to the TomoTool directory, and build TomoTool using Maven
+```
+cd TomoTool
 mvn package
 ```
 4. Add ```TomoTool-1.0-SNAPSHOT.jar``` to your CLASSPATH (in ~/.bashrc)
