@@ -15,12 +15,12 @@ git clone git@github.com:afeborgeaud/TomoTool.git
 4. Change to the TomoTool directory, and build TomoTool using Maven
 ```
 cd TomoTool
-mvn package
+mvn package assembly:single
 ```
-4. Add the generated JAR file ```target/TomoTool-1.0-SNAPSHOT.jar``` to your CLASSPATH (in ~/.bashrc)
+4. Add the generated JAR file ```TomoTool-1.0-SNAPSHOT-jar-with-dependencies.jar``` to your CLASSPATH (in ~/.bashrc)
 ```bash
 # replace /path/to/TomoTool/dir/ by the path to the TomoTool directory cloned in step 3
-echo "# TomoTool\nexport CLASSPATH=/path/to/TomoTool/dir/target/TomoTool-1.0-SNAPSHOT.jar:$CLASSPATH" >> ~/.bashrc
+echo "# TomoTool\nexport CLASSPATH=/path/to/TomoTool/dir/target/TomoTool-1.0-SNAPSHOT-jar-with-dependencies.jar:$CLASSPATH" >> ~/.bashrc
 source ~/.bashrc
 ```
 5. To check that the installation is succesfull, run:
