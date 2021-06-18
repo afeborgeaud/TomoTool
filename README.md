@@ -17,7 +17,7 @@ git clone git@github.com:afeborgeaud/TomoTool.git
 cd TomoTool
 mvn package
 ```
-4. Add ```TomoTool-1.0-SNAPSHOT.jar``` to your CLASSPATH (in ~/.bashrc)
+4. Add the generated JAR file ```target/TomoTool-1.0-SNAPSHOT.jar``` to your CLASSPATH (in ~/.bashrc)
 ```bash
 # replace /path/to/TomoTool/dir/ by the path to the TomoTool directory cloned in step 3
 echo "# TomoTool\nexport CLASSPATH=/path/to/TomoTool/dir/target/TomoTool-1.0-SNAPSHOT.jar:$CLASSPATH" >> ~/.bashrc
