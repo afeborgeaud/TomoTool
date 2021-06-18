@@ -201,4 +201,14 @@
       </plugins>
     </pluginManagement>
   </build>
+	
+  <!-- publish package to Github
+	https://docs.github.com/en/actions/guides/publishing-java-packages-with-maven -->
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages</name>
+      <url>https://maven.pkg.github.com/afeborgeaud/TomoTool</url>
+    </repository>
+  </distributionManagement>
 </project>
