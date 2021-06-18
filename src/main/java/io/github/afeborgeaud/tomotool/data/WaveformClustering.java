@@ -44,8 +44,6 @@ import io.github.kensuke1984.kibrary.util.sac.SACFileName;
 import io.github.afeborgeaud.tomotool.ml.clustering.WaveformDatabase;
 import io.github.afeborgeaud.tomotool.ml.clustering.WaveformDistanceFunction;
 import de.lmu.ifi.dbs.elki.algorithm.clustering.hierarchical.extraction.CutDendrogramByHeight;
-import de.lmu.ifi.dbs.elki.algorithm.clustering.hierarchical.extraction.CutDendrogramByNumberOfClusters;
-import de.lmu.ifi.dbs.elki.algorithm.clustering.hierarchical.extraction.SimplifiedHierarchyExtraction;
 
 public class WaveformClustering {
 	final RealVector[] waveforms;
@@ -57,11 +55,10 @@ public class WaveformClustering {
 	final double cutHeight;
 	
 	public static void main(String[] args) {
-//		Path timewindowPath = Paths.get("/home/anselme/Dropbox/topo_eth_local/synthetics_2/timewindow_ScS_EV1.dat");
-//		Path sacpath = Paths.get("/home/anselme/Dropbox/topo_eth_local/synthetics_2/EV1_ZERO_NEX384");
-		
-		Path timewindowPath = Paths.get("/home/anselme/Dropbox/topo_eth_local/synthetics/timewindow_PKKP_nocut.dat");
-		Path sacpath = Paths.get("/home/anselme/Dropbox/topo_eth_local/synthetics/1D");
+		if (args.length != 2)
+			throw new RuntimeException("Usage: WaveformClustering.java path_to_timewindow_file path_to_sac_file_dir");
+		Path timewindowPath = Paths.get(args[0]);
+		Path sacpath = Paths.get(args[1]);
 		
 		List<TimewindowInformation> timewindows;
 		try {
@@ -112,15 +109,10 @@ public class WaveformClustering {
 		
 		DistanceFunction<NumberVector> dist = new WaveformDistanceFunction();
 		
-//		AGNES<NumberVector> agnes = new AGNES<NumberVector>(dist, CompleteLinkage.STATIC);
-//		PointerHierarchyRepresentationResult result = agnes.run(db);
-		
 		SLINK<NumberVector> slink = new SLINK<NumberVector>(dist);
 		PointerHierarchyRepresentationResult result = slink.run(db);
-		
-//		CutDendrogramByNumberOfClusters cut = new CutDendrogramByNumberOfClusters(slink, 4, true);
+
 		CutDendrogramByHeight cut = new CutDendrogramByHeight(slink, cutHeight, true);
-//		SimplifiedHierarchyExtraction cut = new SimplifiedHierarchyExtraction(slink, 5);
 		dendrogram = cut.run(result);
 		
 	}
@@ -129,29 +121,8 @@ public class WaveformClustering {
 		Relation<NumberVector> rel = db.getRelation(TypeUtil.NUMBER_VECTOR_FIELD);
 		DBIDRange ids = (DBIDRange) rel.getDBIDs();
 		
-//		int i = 0;
-//		for(Cluster<DendrogramModel> clu : dendrogram.getAllClusters()) {
-//		  System.out.println(clu.getModel().getDistance());
-//		  System.out.println("#" + i + ": " + clu.getNameAutomatic());
-//		  System.out.println("Size: " + clu.size());
-//		  System.out.println("Center: " + clu.getModel().toString());
-//		  // Iterate over objects:
-//		  System.out.print("Objects: ");
-//		  for(DBIDIter it = clu.getIDs().iter(); it.valid(); it.advance()) {
-//		    // To get the vector use:
-//		    NumberVector v = rel.get(it);
-//
-//		    // Offset within our DBID range: "line number"
-//		    final int offset = ids.getOffset(it);
-//		    System.out.print(" " + offset);
-//		    // Do NOT rely on using "internalGetIndex()" directly!
-//		  }
-//		  System.out.println();
-//		  ++i;
-//		}
-		
 		Cluster<DendrogramModel> largestCluster = getLargestCluster();
-//		
+	
 		System.out.println(largestCluster.getModel().getDistance());
 		  System.out.println("#" + 0 + ": " + largestCluster.getNameAutomatic());
 		  System.out.println("Size: " + largestCluster.size());

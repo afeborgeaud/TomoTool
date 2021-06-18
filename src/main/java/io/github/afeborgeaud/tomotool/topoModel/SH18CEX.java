@@ -3,6 +3,7 @@ package io.github.afeborgeaud.tomotool.topoModel;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 import io.github.kensuke1984.kibrary.dsminformation.PolynomialStructure;
@@ -16,6 +17,12 @@ public class SH18CEX implements Seismic3Dmodel {
 	private double rmin;
 	
 	private double rmax;
+	
+	public static void main(String[] args) throws IOException {
+		SH18CEX model = new SH18CEX();
+		Path outpath = Paths.get("sh18cex.dat");
+		model.writeCMBElevationMap(outpath);
+	}
 	
 	public SH18CEX() {
 		rmin = 0.;
@@ -82,5 +89,8 @@ public class SH18CEX implements Seismic3Dmodel {
 	@Override
 	public String getName() {
 		return "sh18cex";
+	}
+	
+	public void initVelocityGrid() {
 	}
 }

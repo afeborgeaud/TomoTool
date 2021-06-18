@@ -27,4 +27,6 @@ public interface Seismic3Dmodel {
 	
 	public String getName();
 	
+	public void initVelocityGrid();
+	
 }

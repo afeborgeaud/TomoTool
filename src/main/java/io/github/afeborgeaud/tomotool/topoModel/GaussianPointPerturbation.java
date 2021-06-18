@@ -30,24 +30,17 @@ public class GaussianPointPerturbation implements Seismic3Dmodel {
 	private Seismic3Dmodel mantleModel = new SEMUCBWM1(); 
 	
 	public static void main(String[] args) throws IOException {
-		GaussianPointPerturbation tk10 = new GaussianPointPerturbation();
+		GaussianPointPerturbation gauss = new GaussianPointPerturbation();
 //		double dh = tk10.getCMBElevation(new HorizontalPosition(0, 0));
 //		System.out.println(dh);
 		Path outpath = Paths.get("gauss_ca_1000_8_40.ylm");
-		tk10.writeCMBElevationMap(outpath);
+		gauss.writeCMBElevationMap(outpath);
 	}
 	
 	public GaussianPointPerturbation() {
 		System.out.println("Loading model GaussianPointPerturbation");
 		rmin = 0.;
 		rmax = 6371.;
-		
-//		Path modelPath = Paths.get("/home/navy/git/TopoCMB/resources/tanaka10_lon.sph");
-//		try {
-//		coeffs = ReadUtils.readSphFile(modelPath);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
 		
 		//TODO
 //		String GAUSS_ = "/resources/gauss_ca_1000_8_20.ylm"; // for non-runnable JAR files
@@ -108,5 +101,8 @@ public class GaussianPointPerturbation implements Seismic3Dmodel {
 	@Override
 	public String getName() {
 		return "gauss";
+	}
+	
+	public void initVelocityGrid() {
 	}
 }

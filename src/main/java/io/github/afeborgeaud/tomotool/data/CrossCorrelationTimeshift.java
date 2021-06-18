@@ -256,7 +256,6 @@ public class CrossCorrelationTimeshift {
 	public static void compute_phase(List<TimewindowInformation> timewindows, String modelRefName, String modelName, String phaseName) {
 		String modelSyn = modelRefName;
 		String modelObs = modelName;
-//		Path workDir = Paths.get("/home/anselme/Dropbox/topo_eth_local/synthetics");
 		Path workDir = Paths.get(".");
 		Path obsPath = workDir.resolve(modelObs);
 		Path synPath = workDir.resolve(modelSyn);
@@ -266,8 +265,6 @@ public class CrossCorrelationTimeshift {
 		Path outpath = workDir.resolve("correlationTimeshift_" + modelSyn + "_" + modelObs + "_" + phaseName + ".dat");
 		
 		try {
-//			Seismic3Dmodel seismic3Dmodel = new GaussianPointPerturbation();
-//	
 			Seismic3Dmodel seismic3Dmodel = new TK10();
 			
 			List<io.github.afeborgeaud.tomotool.raytheory.Measurement> rayMearuements = Compute.compute_phase(timewindows, seismic3Dmodel, phaseName);
@@ -304,7 +301,6 @@ public class CrossCorrelationTimeshift {
 	public static void compute_windows(List<TimewindowInformation> timewindows, String modelRefName, String modelName) {
 		String modelSyn = modelRefName;
 		String modelObs = modelName;
-//		Path workDir = Paths.get("/home/anselme/Dropbox/topo_eth_local/synthetics");
 		Path workDir = Paths.get(".");
 		Path obsPath = workDir.resolve(modelObs);
 		Path synPath = workDir.resolve(modelSyn);

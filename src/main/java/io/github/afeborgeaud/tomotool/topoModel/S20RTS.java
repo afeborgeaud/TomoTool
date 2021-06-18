@@ -46,24 +46,6 @@ public class S20RTS implements Seismic3Dmodel {
 		double dh_max = 0.;
 		S20RTS s20rts = new S20RTS(dh_max);
 		
-//		double r = Double.parseDouble(args[0]);
-//		Path outpath = Paths.get(String.format("layer_%.0fkm.dat", r));
-//		
-//		if (args.length == 2) {
-//			int nlmax = Integer.parseInt(args[1]);
-//			s20rts.filter(nlmax);
-//			outpath = Paths.get(String.format("layer_%.0fkm_filter%d.dat", r, nlmax));
-//		}
-//		
-//		try {
-//			s20rts.writeLayer(r, outpath);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-		
-//		Path outpath = Paths.get("s20rts_topo_plus_2_tmp.ylm");
-//		s20rts.writeTopoSph(outpath);
-		
 		double r = Double.parseDouble(args[0]);
 		double lon = Double.parseDouble(args[1]);
 		double lat = Double.parseDouble(args[2]);

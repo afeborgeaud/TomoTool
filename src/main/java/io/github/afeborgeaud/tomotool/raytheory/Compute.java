@@ -877,7 +877,8 @@ public class Compute {
 				System.out.println(model_path.getFileName());
 				
 				String model_name = model_path.getFileName().toString().replace(".ylm", "");
-				ExternalModel seismic3Dmodel = new ExternalModel(model_path.toString(), model_name, true);
+				ExternalModel seismic3Dmodel = new ExternalModel(model_path.toString(), model_name, "s20rts");
+				seismic3Dmodel.initVelocityGrid();
 				
 				seismic3Dmodel.filter(lmax);
 				
@@ -984,7 +985,8 @@ public class Compute {
 				System.out.println(model_path.getFileName());
 				
 				String model_name = model_path.getFileName().toString().replace(".ylm", "");
-				ExternalModel seismic3Dmodel = new ExternalModel(model_path.toString(), model_name, true);
+				ExternalModel seismic3Dmodel = new ExternalModel(model_path.toString(), model_name, "s20rts");
+				seismic3Dmodel.initVelocityGrid();
 				
 				seismic3Dmodel.filter(lmax);
 				

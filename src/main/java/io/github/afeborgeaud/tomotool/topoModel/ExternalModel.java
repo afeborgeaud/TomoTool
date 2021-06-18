@@ -29,44 +29,48 @@ public class ExternalModel implements Seismic3Dmodel {
 	
 	private List<List<Double>> coeffs;
 	
-	private S20RTS mantleModel;
+	private Seismic3Dmodel mantleModel;
 	
 	private int LMAX;
 	
 	private String modelName;
 	
-	public static void main(String[] args) throws IOException {
-		String model_path = "/home/anselme/Dropbox/topo_eth_local/models/geodynamics/CMBtopo-T1_SHcoef_rot_l20.ylm";
-		ExternalModel model = new ExternalModel(model_path, "T1", false);
-		
-		ArrayRealVector topos = new ArrayRealVector(180*360);
-		int i = 0;
-		for (int lon = -180; lon < 180; lon +=2) {
-			for (int lat = -90; lat < 90; lat += 2) {
-				double topo = model.getCMBElevation(new HorizontalPosition(lat, lon));
-				topos.setEntry(i, topo);
-				i++;
-			}
-		}
-		
-		System.out.println(topos.getLInfNorm());
-	}
 	
-	public ExternalModel(String model_path, String model_name, boolean useGrid) {
-//		System.out.println("Loading model GaussianPointPerturbation");
+	/**
+	 * @param modelPath path to the file that describes the CMB topography model
+	 * @param modelName identifier for the topography model
+	 * @param mantleModelName name of the 3D background model (s20rts, semucb, sh18cex, or llnlg3d)
+	 */
+	public ExternalModel(String modelPath, String modelName, String mantleModelName) {
 		rmin = 0.;
 		rmax = 6371.;
 		
-		coeffs = ReadUtils.readSphFile_specfem(model_path);
+		coeffs = ReadUtils.readSphFile_specfem(modelPath);
 		LMAX = coeffs.size();
-		this.modelName = model_name;
+		this.modelName = modelName;
 		
-		mantleModel = new S20RTS();
-		
-		if (useGrid)
-			mantleModel.initVelocityGrid();
+		switch (mantleModelName.toLowerCase()) {
+			case "s20rts":
+				mantleModel = new S20RTS();
+				break;
+			case "semucb":
+			case "semucbwm1":
+			case "semucb-wm1":
+				mantleModel = new SEMUCBWM1();
+			case "sh18cex":
+				mantleModel = new SH18CEX();
+			case "llnlg3d":
+			case "llnlg3djps":
+				mantleModel = new LLNLG3DJPS();
+			default:
+				throw new RuntimeException("mantleModelName should be s20rts, semucb, llnlg3d, or sh18cex");
+		}
 	}
 	
+	/**
+	 * Get the CMB elevation at a position in km 
+	 * @param position
+	 */
 	public double getCMBElevation(HorizontalPosition position) {
 		double lon = position.getLongitude();
 		if (lon > 180.)
@@ -78,6 +82,9 @@ public class ExternalModel implements Seismic3Dmodel {
 		return dr;
 	}
 	
+	/**
+	 * Write the CMB elevation map to file with 2 degree lat, lon increments
+	 */
 	public void writeCMBElevationMap(Path outpath, StandardOpenOption... options) throws IOException {
 		PrintWriter pw = new PrintWriter(outpath.toFile());
 		for (int ilon = -179; ilon <= 180; ilon += 2) {
@@ -89,6 +96,9 @@ public class ExternalModel implements Seismic3Dmodel {
 		pw.close();
 	}
 	
+	/**
+	 * Get Vp anomaly at location loc in percent
+	 */
 	public double getdlnVp(Location loc) {
 		return mantleModel.getdlnVp(loc);
 	}
@@ -123,5 +133,9 @@ public class ExternalModel implements Seismic3Dmodel {
 	@Override
 	public String getName() {
 		return modelName;
+	}
+	
+	public void initVelocityGrid() {
+		mantleModel.initVelocityGrid();
 	}
 }

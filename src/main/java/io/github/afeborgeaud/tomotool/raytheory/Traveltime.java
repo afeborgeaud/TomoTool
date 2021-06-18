@@ -84,7 +84,6 @@ public class Traveltime {
 		List<int[]> batches = create_batches((int) (1e5));
 		
 		for (RaypathInformation raypathInformation : raypathInformations) {
-//		raypathInformations.parallelStream().forEach(raypathInformation -> {
 			taupUtils.setCMTLocation(raypathInformation.getCmtLocation());
 			
 			try {
@@ -93,9 +92,6 @@ public class Traveltime {
 				System.out.println(e.getMessage());
 				continue;
 			}
-			
-//			Map<String, List<ScatterPoint>> scatterPointMap = taupUtils.getScatterPointMap();
-//			Map<String, Location[]> raypathMap = taupUtils.getRaypathMap();
 			
 			double distance = raypathInformation.getDistanceDegree();
 			
@@ -109,7 +105,6 @@ public class Traveltime {
 				double[] traveltimes = new double[3];
 				boolean addPoint = true;
 				
-//				List<ScatterPoint> scatterPoints = scatterPointMap.get(phaseName);
 				List<ScatterPoint> scatterPoints = ray.scatterPoints;
 				
 				if (scatterPoints != null) {
@@ -130,7 +125,6 @@ public class Traveltime {
 				
 				// Effect of 3-D mantle velocity
 				if (!ignoreMantle) {
-//					Location[] raypath = raypathMap.get(phaseName);
 					Location[] raypath = ray.raypath;
 					if (raypath != null)
 						if (addPoint) {
@@ -194,35 +188,15 @@ public class Traveltime {
 	private double[] calculateV(Location[] raypath, String phaseName) {
 		double[] traveltime = new double[3];
 		double d0 = raypath[0].getDistance(raypath[1]);
-//		Location loc = raypath[0].toXYZ().getMidPoint(raypath[1].toXYZ()).toLocation();
 		traveltime = add(traveltime, calculateOnePointV(d0, raypath[0], raypath[1], phaseName));
-//		System.out.println(raypath[0]);
 		for (int i = 1; i < raypath.length - 1; i++) {
-//			System.out.println(raypath[i]);
-//			loc = raypath[i].toXYZ().getMidPoint(raypath[i+1].toXYZ()).toLocation();
 			d0 = raypath[i].getDistanceGeographical(raypath[i+1]);
 			traveltime = add(traveltime, calculateOnePointV(d0, raypath[i], raypath[i+1], phaseName));
 		}
-//		System.out.println(raypath[raypath.length - 1]);
-//		traveltime = add(traveltime, calculateOnePointV(d0, raypath[raypath.length - 1], phaseName));
 		
 		return traveltime;
 	}
 	
-//	private double[] calculateV(Location[] raypath, String phaseName) {
-//		double[] traveltime = new double[3];
-//		double d0 = raypath[0].getDistance(raypath[1]) / 2.;
-//		traveltime = add(traveltime, calculateOnePointV(d0, raypath[0], phaseName));
-//		double d1 = 0.;
-//		for (int i = 1; i < raypath.length - 1; i++) {
-//			d1 = raypath[i].getDistance(raypath[i+1]) / 2.;
-//			traveltime = add(traveltime, calculateOnePointV(d0 + d1, raypath[i], phaseName));
-//			d0 = d1;
-//		}
-//		traveltime = add(traveltime, calculateOnePointV(d0, raypath[raypath.length - 1], phaseName));
-//		
-//		return traveltime;
-//	}
 	
 	private double[] calculateOnePointV(double l, Location loc, String phaseName) {
 		double[] times = new double[3];

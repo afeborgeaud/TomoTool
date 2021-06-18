@@ -7,27 +7,15 @@ import java.nio.file.Path;
 import java.util.List;
 
 import javax.swing.JFrame;
-
-import org.apache.commons.math3.linear.ArrayRealVector;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-
-
-import de.lmu.ifi.dbs.elki.data.Cluster;
-import de.lmu.ifi.dbs.elki.data.NumberVector;
-import de.lmu.ifi.dbs.elki.data.model.DendrogramModel;
-import de.lmu.ifi.dbs.elki.data.type.TypeUtil;
-import de.lmu.ifi.dbs.elki.database.ids.DBIDIter;
-import de.lmu.ifi.dbs.elki.database.ids.DBIDRange;
-import de.lmu.ifi.dbs.elki.database.relation.Relation;
 import io.github.afeborgeaud.tomotool.data.AlignWindows.PolarizedShift;
 import io.github.kensuke1984.kibrary.timewindow.TimewindowInformation;
 import io.github.kensuke1984.kibrary.util.Trace;

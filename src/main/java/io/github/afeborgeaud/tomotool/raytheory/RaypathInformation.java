@@ -79,9 +79,6 @@ public class RaypathInformation {
 	
 	public static void writeRaypathInformation(List<RaypathInformation> rays, Path outpath) throws IOException {
 		PrintWriter pw = new PrintWriter(outpath.toFile());
-//		rays.stream().forEach(r -> pw.println(r.getEvent() + " " + r.getEvent().getEvent().getCmtLocation() + " " +
-//				r.getStation().getStationName() 
-//				+ " " + r.getStation().getNetwork() + " " + r.getStation().getPosition()));
 		rays.stream().forEach(r -> pw.println(r.getEvent() + " " +
 				r.getStation().getName() 
 				+ " " + r.getStation().getNetwork() + " " + r.getStation().getPosition()));

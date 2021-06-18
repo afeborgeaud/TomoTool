@@ -205,4 +205,7 @@ public class SEMUCBWM1 implements Seismic3Dmodel {
 		return "semucbwm1";
 	}
 	
+	public void initVelocityGrid() {
+	}
+	
 }

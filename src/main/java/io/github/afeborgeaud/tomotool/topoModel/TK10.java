@@ -31,8 +31,6 @@ public class TK10 implements Seismic3Dmodel {
 	
 	public static void main(String[] args) throws IOException {
 		TK10 tk10 = new TK10();
-//		double dh = tk10.getCMBElevation(new HorizontalPosition(0, 0));
-//		System.out.println(dh);
 		Path outpath = Paths.get("tk10.dat");
 		tk10.writeCMBElevationMap(outpath);
 	}
@@ -107,5 +105,8 @@ public class TK10 implements Seismic3Dmodel {
 	@Override
 	public String getName() {
 		return "tk10";
+	}
+	
+	public void initVelocityGrid() {
 	}
 }

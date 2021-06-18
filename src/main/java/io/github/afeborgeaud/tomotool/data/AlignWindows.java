@@ -55,10 +55,9 @@ public class AlignWindows {
 	}
 	
 	public static void main(String[] args) {
-		Path timewindowPath = Paths.get("/home/anselme/Dropbox/topo_eth_local/synthetics/timewindow_PKKP_nocut.dat");
-		Path sacpath = Paths.get("/home/anselme/Dropbox/topo_eth_local/synthetics/1D");
-		
-//		GlobalCMTID id = new GlobalCMTID("200602021248A");
+		if (args.length != 2) System.err.println("Usage: WaveformClustering.java path_to_timewindow_file path_to_sac_file_dir");
+		Path timewindowPath = Paths.get(args[0]);
+		Path sacpath = Paths.get(args[1]);
 		
 		double timeBeforePeak = 20;
 		double timeAfterPeak = 20;
@@ -74,9 +73,6 @@ public class AlignWindows {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-//		timewindows = timewindows.parallelStream().filter(tw -> tw.getGlobalCMTID().equals(id)).collect(Collectors.toList());
-		
 		
 		AlignWindows alignwindows = new AlignWindows(timewindows, sacpath, timeBeforePeak, timeAfterPeak, minCc);
 		alignwindows.run();
@@ -144,9 +140,6 @@ public class AlignWindows {
 		computePhase2AlignTimewindows();
 		
 		removeBadWindows();
-		
-//		System.err.println(alignedTimewindows.size() + " windows after selection");
-//		polarizedShifts.stream().forEach(System.out::println);
 		
 		System.err.println("Done");
 	}
@@ -286,28 +279,10 @@ public class AlignWindows {
 		polarizedShifts = tmpshifts;
 	}
 	
-//	private final double maxAmplitudeRatio = 1.5;
-	
-//	private void removeWindowsBasedOnAmplitude() {
-//		List<TimewindowInformation> tmpwindows = new ArrayList<>();
-//		List<Double> tmpamplitudes = new ArrayList<>();
-//		for (int i = 0; i < timewindows.size(); i++) {
-//			RealVector wavelet = eventWaveletMap.get(timewindows.get(i).getGlobalCMTID());
-//			double ratio = amplitudes.get(i) / wavelet.getLInfNorm();
-//			System.out.println(amplitudes.get(i) + " " + wavelet.getLInfNorm() + " " + ratio);
-//			if (ratio <= maxAmplitudeRatio && ratio >= 1. / maxAmplitudeRatio) {
-//				tmpwindows.add(timewindows.get(i));
-//				tmpamplitudes.add(amplitudes.get(i));
-//			}
-//		}
-//		amplitudes = tmpamplitudes;
-//		timewindows = tmpwindows;
-//	}
 	
 	private void computeAlignTimewindows() {
 		alignedTimewindows = new ArrayList<TimewindowInformation>();
 		polarizedShifts = new ArrayList<>();
-//		amplitudes = new ArrayList<>();
 		
 		for (int i = 0; i < timewindows.size(); i++) {
 			TimewindowInformation window = timewindows.get(i);
@@ -338,11 +313,8 @@ public class AlignWindows {
 				TimewindowInformation tmpwindow = new TimewindowInformation(t0, t1,
 						window.getStation(), window.getGlobalCMTID(),
 						window.getComponent(), window.getPhases());
-//				RealVector shiftedWaveform = new SACFileName(syn).read().createTrace()
-//						.cutWindow(tmpwindow).removeTrend().getYVector();
 				alignedTimewindows.add(tmpwindow);
 				polarizedShifts.add(pointShift);
-//				amplitudes.add(shiftedWaveform.getLInfNorm());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

@@ -214,4 +214,7 @@ public class LLNLG3DJPS implements Seismic3Dmodel {
 	public String getName() {
 		return "llnlg3djps";
 	}
+	
+	public void initVelocityGrid() {
+	}
 }

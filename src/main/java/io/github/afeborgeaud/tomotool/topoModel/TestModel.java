@@ -61,5 +61,8 @@ public class TestModel implements Seismic3Dmodel {
 		// TODO Auto-generated method stub
 		return "TestModel";
 	}
+	
+	public void initVelocityGrid() {
+	}
 
 }
