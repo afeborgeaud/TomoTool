@@ -3,19 +3,34 @@ Java tools for computation of travel-time perturbations due to the Earth's core-
 DISCLAMER: TomoTool is not yet intended for general usage (lack of documentation, lack of user-friendly interface), but simple usages for computing travel-time perturbations from an input raypath information file are given bellow.
 
 ## INSTALLATION
-1. Download [tomoTool.jar](https://www.dropbox.com/s/r6l2npi2vnry0xf/tomoTool.jar?dl=0)
-2. Add ```tomoTool.jar``` to your CLASSPATH (in ~/.bashrc)
+1. [Install Apache Maven](https://maven.apache.org/download.cgi)
 ```bash
-export CLASSPATH=$CLASSPATH:path/to/tomoTool.jar
+# On macOS, maven can be installed using brew
+brew install maven
+````
+2. Clone the TomoTool respository to your local machine
+3. Build TomoTool using Maven
+```
+mvn package
+```
+4. Add ```TomoTool-1.0-SNAPSHOT.jar``` to your CLASSPATH (in ~/.bashrc)
+```bash
+# replace /path/to/TomoTool/dir/ by the path to the TomoTool directory cloned in step 3
+echo "# TomoTool\nexport CLASSPATH=/path/to/TomoTool/dir/target/TomoTool-1.0-SNAPSHOT.jar:$CLASSPATH" >> ~/.bashrc
+source ~/.bashrc
+```
+5. To check that the installation is succesfull, run:
+```bash
+java io.github.afeborgeaud.tomotool.About
 ```
 
 ## USAGE
-A template raypath information file is in ```resources/example/raypath_informations.txt```<br>
+A template raypath information file is in ```src/main/resources/example/raypath_informations.txt```<br>
 
 ### Computation of differential PcP-P or ScS-S travel-times
 You can compute differential PcP-P travel-time perturbations due to the 3-D mantle using
 ```java
-java raytheory.ComputeCorrection raypath_informations.txt semucb pcp
+java io.github.afeborgeaud.tomotool.raytheory.ComputeCorrection raypath_informations.txt semucb pcp
 ```
 Note: path to a Kibrary TimewindowInformationFile binary file can also be used instead of ```raypath_information.txt```.<br>
 The outputs are ```bouncepointPcP.dat``` (travel-time perturbations at PcP bouncing points) and ```mantleCorrection_P-PcP.dat``` (a binary kibrary StaticCorrectionFile). Currently, the following 3-D models are available:
@@ -26,30 +41,5 @@ The outputs are ```bouncepointPcP.dat``` (travel-time perturbations at PcP bounc
 ### Computation of travel-time perturbations due to CMB topo and 3-D mantle
 You can compute travel-time perturbations for topo and mantle for the model tk10 (Tanaka, 2010) for the ScS phase using
 ```java
-java raytheory.Compute raypath_informations.txt tk10 ScS
+java io.github.afeborgeaud.tomotool.raytheory.Compute raypath_informations.txt tk10 ScS
 ```
-
-## DEPENDENCIES
-The dependencies are included in the runnable [tomoTool.jar](https://www.dropbox.com/sh/03ksrnmnr5zbh02/AADj0Lli8DRbfyxkf3kfZBfQa?dl=0) JAR file.
-- activation
-- jfreechart
-- jcommon
-- Apache Commons io
-- Apache Commons Math
-- Apache Commons Lang
-- Apache Commons cli
-- Apache Commons net
-- Apache Commons email
-- javax.mail
-- epsgraphics
-- javax.mail
-- jcommon
-- jfreechart
-- log4j
-- netcdfAll
-- seedCodec
-- seisFile
-- slf4j
-- TauP
-- [elki](https://elki-project.github.io/releases/release0.7.5/elki-bundle-0.7.5.jar)
-- [Kibrary](https://www.dropbox.com/s/6mm0cfk259x8l25/kibrary-anselme.jar?dl=0)
