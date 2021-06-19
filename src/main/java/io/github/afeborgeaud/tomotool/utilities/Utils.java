@@ -1,5 +1,6 @@
 package io.github.afeborgeaud.tomotool.utilities;
 
+import io.github.afeborgeaud.tomotool.topoModel.ExternalModel;
 import io.github.afeborgeaud.tomotool.topoModel.GaussianPointPerturbation;
 import io.github.afeborgeaud.tomotool.topoModel.LLNLG3DJPS;
 import io.github.afeborgeaud.tomotool.topoModel.S20RTS;
@@ -31,7 +32,11 @@ public class Utils {
 			seismic3Dmodel = new S20RTS();
 			break;
 		default:
-			throw new RuntimeException("Error: 3D model " + modelName + " not implemented yet");
+			try {
+				seismic3Dmodel = new ExternalModel(modelName, "custom", "s20rts");
+			} catch (Exception e) {
+				throw new RuntimeException("Error: 3D model " + modelName + " not implemented yet");
+			}
 		}
 		return seismic3Dmodel;
 	}
