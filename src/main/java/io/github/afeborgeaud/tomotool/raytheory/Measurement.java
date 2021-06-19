@@ -87,7 +87,11 @@ public class Measurement {
 	
 	@Override
 	public String toString(){
-		return station +  " " + event + " " + phaseName + " " + String.format("%.3f", traveltimes[0]);
+		return station +  " " + event + " " + phaseName + " " + String.format("%.5f", traveltimes[0]);
+	}
+	
+	public String getHashableID() {
+		return station.getStringID() + event.toString() + phaseName;
 	}
 	
 	public Station getStation() {

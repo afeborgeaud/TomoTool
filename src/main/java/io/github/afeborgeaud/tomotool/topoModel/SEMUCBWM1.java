@@ -149,7 +149,6 @@ public class SEMUCBWM1 implements Seismic3Dmodel {
 	@Override
 	public void writeCMBElevationMap(Path outpath, StandardOpenOption... options) throws IOException {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override

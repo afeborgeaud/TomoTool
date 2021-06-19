@@ -236,8 +236,8 @@ public class TauPUtils {
 		case "PKiKP":
 			if (scatterPoints.size() != 2)
 				throw new RuntimeException("Unexpected number for " + phaseName + " " + scatterPoints.size());
-			scatterList.add(new ScatterPoint(scatterPoints.get(0), rayparam, ScatterType.transmission, WaveType.S));
-			scatterList.add(new ScatterPoint(scatterPoints.get(2), rayparam, ScatterType.transmission, WaveType.S));
+			scatterList.add(new ScatterPoint(scatterPoints.get(0), rayparam, ScatterType.transmission, WaveType.P));
+			scatterList.add(new ScatterPoint(scatterPoints.get(1), rayparam, ScatterType.transmission, WaveType.P));
 			break;
 		case "SKSm":
 		case "SKKKSm":

@@ -40,13 +40,6 @@ public class TK10 implements Seismic3Dmodel {
 		rmin = 0.;
 		rmax = 6371.;
 		
-//		Path modelPath = Paths.get("/home/anselme/git/TomoTool/resources/tanaka10_lon.sph");
-//		try {
-//		coeffs = ReadUtils.readSphFile(modelPath);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-		
 		// TODO
 //		String TK10 = "/resources/tanaka10_lon.sph"; // for non-runnable JAR files
 		String TK10 = "/tanaka10_lon.sph"; // for runnable JAR files

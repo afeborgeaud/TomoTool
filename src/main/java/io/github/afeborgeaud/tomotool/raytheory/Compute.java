@@ -35,6 +35,7 @@ import io.github.afeborgeaud.tomotool.topoModel.SEMUCBWM1;
 import io.github.afeborgeaud.tomotool.topoModel.Seismic3Dmodel;
 import io.github.afeborgeaud.tomotool.topoModel.TK10;
 import io.github.afeborgeaud.tomotool.utilities.ReadUtils;
+import io.github.afeborgeaud.tomotool.utilities.Utils;
 
 public class Compute {
 
@@ -69,7 +70,7 @@ public class Compute {
 			String phaseName = args[2].trim();
 			
 			List<RaypathInformation> raypathInformations = RaypathInformation.readRaypathInformation(raypathInformationPath);
-			Seismic3Dmodel seismic3Dmodel = parse3DModel(threeDmodel.toLowerCase());
+			Seismic3Dmodel seismic3Dmodel = Utils.parse3DModel(threeDmodel.toLowerCase());
 			String refModelName = "prem";
 			
 			List<Measurement> measurements_mantle = compute_phase_from_raypathinfo(raypathInformations,
@@ -116,33 +117,6 @@ public class Compute {
 //			compute_phase_differential(timewindows, seismic3dmodel, phaseRef, phase, true, false);
 //		}
 		
-	}
-		
-	private static Seismic3Dmodel parse3DModel(String modelName) {
-		Seismic3Dmodel seismic3Dmodel = null;
-		switch (modelName) {
-		case "semucb":
-		case "semucbwm1":
-		case "semucb_wm1":
-			seismic3Dmodel = new SEMUCBWM1();
-			break;
-		case "llnlg3d":
-			seismic3Dmodel = new LLNLG3DJPS();
-			break;
-		case "tanaka10":
-		case "tk10":
-			seismic3Dmodel = new TK10();
-			break;
-		case "gauss":
-			seismic3Dmodel = new GaussianPointPerturbation();
-			break;
-		case "s20rts":
-			seismic3Dmodel = new S20RTS();
-			break;
-		default:
-			throw new RuntimeException("Error: 3D model " + modelName + " not implemented yet");
-		}
-		return seismic3Dmodel;
 	}
 	
 	private static void writeMeasurements(Path outpath, List<Measurement> measurements, String phaseName) {

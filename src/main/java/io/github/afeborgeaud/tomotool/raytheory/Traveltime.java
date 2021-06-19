@@ -279,7 +279,8 @@ public class Traveltime {
 			}
 		}
 		else if (phaseName.equals("P") || phaseName.equals("PcP") || phaseName.equals("PKP") || phaseName.equals("PKKP") || phaseName.equals("PKKKP") || phaseName.equals("PKKKKP")
-				|| phaseName.equals("PKPm") || phaseName.equals("PKKPm") || phaseName.equals("PKKKPm") || phaseName.equals("PKKKKPm")) {
+				|| phaseName.equals("PKPm") || phaseName.equals("PKKPm") || phaseName.equals("PKKKPm") || phaseName.equals("PKKKKPm")
+				|| phaseName.equals("PKiKP")) {
 			double r1, r2;
 			if (loc1.getR() > loc2.getR()) {
 				r1 = loc1.getR() - 1e-5;

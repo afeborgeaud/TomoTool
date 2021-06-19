@@ -1,0 +1,51 @@
+package io.github.afeborgeaud.tomotool;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import io.github.afeborgeaud.tomotool.raytheory.Compute;
+import io.github.afeborgeaud.tomotool.raytheory.Measurement;
+import io.github.afeborgeaud.tomotool.raytheory.RaypathInformation;
+import io.github.afeborgeaud.tomotool.topoModel.Seismic3Dmodel;
+import io.github.afeborgeaud.tomotool.utilities.Utils;
+
+import junit.framework.*;
+
+
+public class ComputePhaseTest extends TestCase {
+	
+	public final static double EPS = 2e-5;
+	
+//	public static void main(String[] args) {
+//		testPKiKP();
+//	}
+	
+	public void testPKiKP() {
+		String RESULT_STRING_TOPO = "AAK_II 200602021248A PKiKP 0.00079,ABKT_II 200602021248A PKiKP -0.02737,ALE_II 200602021248A PKiKP 0.01163,ARU_II 200602021248A PKiKP -0.01261,ASCN_II 200602021248A PKiKP -0.01188,BFO_II 200602021248A PKiKP -0.01411,BORG_II 200602021248A PKiKP 0.04057,BRVK_II 200602021248A PKiKP -0.00436,CMLA_II 200602021248A PKiKP 0.06237,COCO_II 200602021248A PKiKP 0.03125,DGAR_II 200602021248A PKiKP -0.00450,EFI_II 200602021248A PKiKP -0.05793,ERM_II 200602021248A PKiKP 0.01252,ESK_II 200602021248A PKiKP 0.02167,FFC_II 200602021248A PKiKP 0.00093,HOPE_II 200602021248A PKiKP -0.06190,JTS_II 200602021248A PKiKP -0.01985,KAPI_II 200602021248A PKiKP 0.02611,KDAK_II 200602021248A PKiKP 0.01387,KIV_II 200602021248A PKiKP -0.04758,KURK_II 200602021248A PKiKP 0.00229,KWAJ_II 200602021248A PKiKP 0.05802,LVZ_II 200602021248A PKiKP -0.00233,MBAR_II 200602021248A PKiKP -0.00403,MSEY_II 200602021248A PKiKP -0.02706,MSVF_II 200602021248A PKiKP 0.00334,NIL_II 200602021248A PKiKP 0.00042,NNA_II 200602021248A PKiKP -0.02837,OBN_II 200602021248A PKiKP -0.02716,PALK_II 200602021248A PKiKP 0.01019,PFO_II 200602021248A PKiKP -0.01249,RAYN_II 200602021248A PKiKP -0.05687,RPN_II 200602021248A PKiKP -0.08745,SHEL_II 200602021248A PKiKP 0.00927,SUR_II 200602021248A PKiKP -0.01072,TAU_II 200602021248A PKiKP 0.02358,TLY_II 200602021248A PKiKP 0.00585,WRAB_II 200602021248A PKiKP 0.03660,XPF_II 200602021248A PKiKP -0.01249";
+		String RESULT_STRING_MANTLE = "AAK_II 200602021248A PKiKP -0.09155,ABKT_II 200602021248A PKiKP -0.03233,ALE_II 200602021248A PKiKP 0.40923,ARU_II 200602021248A PKiKP 0.01912,ASCN_II 200602021248A PKiKP 1.61824,BFO_II 200602021248A PKiKP 1.03481,BORG_II 200602021248A PKiKP 2.50153,BRVK_II 200602021248A PKiKP 0.10030,CMLA_II 200602021248A PKiKP 2.24781,COCO_II 200602021248A PKiKP 1.01647,DGAR_II 200602021248A PKiKP 0.95465,EFI_II 200602021248A PKiKP -0.69124,ERM_II 200602021248A PKiKP 0.41427,ESK_II 200602021248A PKiKP 1.14501,FFC_II 200602021248A PKiKP 0.00940,HOPE_II 200602021248A PKiKP -0.04111,JTS_II 200602021248A PKiKP 0.71207,KAPI_II 200602021248A PKiKP 0.19773,KDAK_II 200602021248A PKiKP 0.94734,KIV_II 200602021248A PKiKP 0.71671,KURK_II 200602021248A PKiKP -0.15844,KWAJ_II 200602021248A PKiKP 2.28437,LVZ_II 200602021248A PKiKP -0.14823,MBAR_II 200602021248A PKiKP 1.95755,MSEY_II 200602021248A PKiKP 0.96597,MSVF_II 200602021248A PKiKP 2.20323,NIL_II 200602021248A PKiKP -0.07509,NNA_II 200602021248A PKiKP 0.32652,OBN_II 200602021248A PKiKP -0.06289,PALK_II 200602021248A PKiKP 0.61525,PFO_II 200602021248A PKiKP 2.26984,RAYN_II 200602021248A PKiKP 0.40745,RPN_II 200602021248A PKiKP 2.42593,SHEL_II 200602021248A PKiKP 2.14302,SUR_II 200602021248A PKiKP 0.41935,TAU_II 200602021248A PKiKP 0.94799,TLY_II 200602021248A PKiKP 1.02686,WRAB_II 200602021248A PKiKP -0.70480,XPF_II 200602021248A PKiKP 2.26983";
+		Map<String, Double> result_topo = Arrays.stream(RESULT_STRING_TOPO.split(",")).map(line -> line.split(" "))
+								.collect(Collectors.toMap(x -> x[0] + x[1] + x[2], x -> Double.parseDouble(x[3])));
+		Map<String, Double> result_mantle = Arrays.stream(RESULT_STRING_MANTLE.split(",")).map(line -> line.split(" "))
+				.collect(Collectors.toMap(x -> x[0] + x[1] + x[2], x -> Double.parseDouble(x[3])));
+		
+		List<RaypathInformation> raypathInformations = Environment.sampleRaypathInfo();
+		String threeDModel = "tk10";
+		String phaseName = "PKiKP";
+		
+		Seismic3Dmodel seismic3Dmodel = Utils.parse3DModel(threeDModel.toLowerCase());
+		String refModelName = "prem";
+		
+		List<Measurement> measurements_mantle = Compute.compute_phase_from_raypathinfo(raypathInformations,
+				seismic3Dmodel, refModelName, phaseName, true, false);
+		List<Measurement> measurements_topo = Compute.compute_phase_from_raypathinfo(raypathInformations,
+				seismic3Dmodel, refModelName, phaseName, false, true);
+		
+		assertFalse(measurements_topo.stream()
+				.anyMatch(m -> Math.abs(result_topo.get(m.getHashableID()) - m.getTraveltimePerturbation()) > EPS));
+		assertFalse(measurements_mantle.stream()
+				.anyMatch(m -> Math.abs(result_mantle.get(m.getHashableID()) - m.getTraveltimePerturbation()) > EPS));
+	}
+	
+}

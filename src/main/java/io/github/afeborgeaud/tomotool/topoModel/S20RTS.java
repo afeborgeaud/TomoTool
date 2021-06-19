@@ -229,40 +229,6 @@ public class S20RTS implements Seismic3Dmodel {
 		
 		double dlnvs0 = dlnvsGrid[idep][ilon][ilat];
 		double dlnvs0_dep = dlnvsGrid[idep1][ilon][ilat];
-//		double d0 = Math.sqrt((lat - lat0)*(lat - lat0) + (lon - lon0)*(lon - lon0));
-//		
-//		double dlat = 0;
-//		double dlnvs_lat = 0;
-//		double dlnvs_lat_dep = 0;
-//		if (lat - lat0 > 0) {
-////			dlat = Math.sqrt((latGrid[ilat+1] - lat)*(latGrid[ilat+1] - lat) + (lon - lon0)*(lon - lon0));
-//			dlat = lat0;
-//			dlnvs_lat = dlnvsGrid[idep][ilon][ilat+1];
-//			dlnvs_lat_dep = dlnvsGrid[idep1][ilon][ilat+1];
-//		}
-//		
-//		double dlon = 0;
-//		double dlnvs_lon = 0;
-//		double dlnvs_lon_dep = 0;
-//		if (lon - lon0 > 0) {
-//			dlon = Math.sqrt((lonGrid[ilon+1] - lon)*(lonGrid[ilon+1] - lon) + (lat - lat0)*(lat - lat0));
-//			dlnvs_lon = dlnvsGrid[idep][ilon+1][ilat];
-//			dlnvs_lon_dep = dlnvsGrid[idep1][ilon+1][ilat];
-//		}
-//		
-//		double dlonlat = 0;
-//		double dlnvs_lonlat = 0;
-//		double dlnvs_lonlat_dep = 0;
-//		if (lon -lon0 > 0 && lat-lat0 > 0) {
-//			dlonlat = Math.sqrt((latGrid[ilat+1] - lat)*(latGrid[ilat+1] - lat) + (lonGrid[ilon+1] - lon)*(lonGrid[ilon+1] - lon));
-//			dlnvs_lonlat = dlnvsGrid[idep][ilon+1][ilat+1];
-//			dlnvs_lonlat_dep = dlnvsGrid[idep1][ilon+1][ilat+1];
-//		}
-		
-//		double dlnvs = (dlnvs0 * d0 + dlnvs_lat * dlat + dlnvs_lon + dlon + dlnvs_lonlat * dlonlat) / 4.;
-//		double dlnvs_dep = (dlnvs0_dep * d0 + dlnvs_lat_dep * dlat + dlnvs_lon_dep + dlon + dlnvs_lonlat_dep * dlonlat) / 4.;
-		
-//		double dlnvs_ = dlnvs + (dep - dep0) / dr_grid * (dlnvs_dep - dlnvs);
 		
 		double dlnvs_lon = dlnvs0 + (lon - lon0)/dlon_grid * (dlnvsGrid[idep][ilon1][ilat] - dlnvs0);
 		double dlnvs_lon_lat = dlnvsGrid[idep][ilon][ilat1] + (lon - lon0)/dlon_grid * (dlnvsGrid[idep][ilon1][ilat1] - dlnvsGrid[idep][ilon][ilat1]);
