@@ -43,7 +43,19 @@ The outputs are ```bouncepointPcP.dat``` (travel-time perturbations at PcP bounc
 - s20rts (S20RTS & SP12; Ritsema et al. 2000)
 
 ### Computation of travel-time perturbations due to CMB topo and 3-D mantle
-You can compute travel-time perturbations for topo and mantle for the model tk10 (Tanaka, 2010) for the ScS phase using
+You can compute travel-time perturbations for topo and mantle for the model tk10 (Tanaka, 2010) for the ScS phase using:
 ```java
 java io.github.afeborgeaud.tomotool.raytheory.Compute raypath_informations.txt tk10 ScS
+```
+Currently, the following CMB topography models are implemented:
+- tk10 (Tanaka, 2010)
+- a user-defined CMB topography model using spherical harmonics coefficients<br>
+
+Currently accepted phases are:
+- S, ScS, ScSScS, ScSScSScS, SKS, SKKS, SKKKS, SKKKKS
+- P, PcP, PcS, PKP, PKKP, PKKKP, PKKKKP, PKiKP<br>
+
+For instance, the same computation as above but for PKiKP can be done using:
+```java
+java io.github.afeborgeaud.tomotool.raytheory.Compute raypath_informations.txt tk10 PKiKP
 ```
