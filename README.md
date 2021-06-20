@@ -43,9 +43,27 @@ The outputs are ```bouncepointPcP.dat``` (travel-time perturbations at PcP bounc
 - s20rts (S20RTS & SP12; Ritsema et al. 2000)
 
 ### Computation of travel-time perturbations due to CMB topo and 3-D mantle
-You can compute travel-time perturbations for topo and mantle for the model tk10 (Tanaka, 2010) for the ScS phase using:
+You can compute travel time perturbations for CMB topography and 3-D mantle using:
 ```java
-java io.github.afeborgeaud.tomotool.raytheory.Compute raypath_informations.txt tk10 ScS
+java io.github.afeborgeaud.tomotool.raytheory.Compute -ri path/to/raypath/info/file -m modelName -p phaseName
+```
+The full list of CLI arguments can be printed using:
+```bash
+java io.github.afeborgeaud.tomotool.raytheory.Compute --help
+usage: Compute
+ -h,--help                  print this message
+ -m,--model <arg>           name of the mantle/topo model, or path to a
+                            custom model file
+ -n,--model-name <arg>      name of the mantle/topo model (for custom
+                            models)
+ -p,--phase <arg>           seismic phase
+ -ri,--raypath-info <arg>   path to a raypath information file
+```
+<br>
+
+For instance, you can compute travel-time perturbations for topo and mantle for the model tk10 (Tanaka, 2010) for the ScS phase using:
+```java
+java io.github.afeborgeaud.tomotool.raytheory.Compute -ri raypath_informations.txt -m tk10 -p ScS
 ```
 Currently, the following CMB topography models are implemented:
 - tk10 (Tanaka, 2010)
@@ -57,5 +75,11 @@ Currently accepted phases are:
 
 For instance, the same computation as above but for PKiKP can be done using:
 ```java
-java io.github.afeborgeaud.tomotool.raytheory.Compute raypath_informations.txt tk10 PKiKP
+java io.github.afeborgeaud.tomotool.raytheory.Compute -ri raypath_informations.txt -m tk10 -p PKiKP
 ```
+
+Exemples of custom spherical harmonics topography model are in ``src/main/resources``:
+- dh89.sph
+- md87.sph
+- sh03.sph
+- gauss_ca_1000_8_20.ylm (in SPECFEM format)
