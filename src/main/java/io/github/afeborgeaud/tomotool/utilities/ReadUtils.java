@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,10 +70,49 @@ public class ReadUtils {
 		}).collect(Collectors.toSet());
 	}
 	
-	public static List<List<Double>> readSphFile(Path path) throws IOException {
+	public static boolean isSphFile(String path) {
+		try {
+			int[] nCoeffs = Files.readAllLines(Paths.get(path)).stream()
+					.filter(line -> !line.startsWith("#"))
+					.mapToInt(line -> line.trim().split("\\s+").length).toArray();
+			for (int i = 0; i < nCoeffs.length; i++) {
+				if (nCoeffs[i] != 2*i + 1) return false;
+			}
+		} catch (Exception e) {
+			return false;
+		}
+		return true;
+	}
+	
+	public static boolean isSphSpecfemFile(String path) {
+		try {
+			BufferedReader bufferedReader = 
+		            new BufferedReader(new FileReader(path));
+			double lmax = Double.parseDouble(bufferedReader.readLine().trim());
+			bufferedReader.close();
+			
+			int[] nCoeffs = Files.readAllLines(Paths.get(path)).stream()
+					.filter(line -> !line.startsWith("#"))
+					.mapToInt(line -> line.trim().split("\\s+").length).toArray();
+			if (nCoeffs[0] != 1) return false;
+			if (nCoeffs.length != lmax + 2) return false;
+			for (int i = 1; i < nCoeffs.length; i++) {
+				if (nCoeffs[i] != lmax + 1) return false;
+			}
+		} catch (Exception e) {
+			return false;
+		}
+		return true;
+	}
+	
+	public static List<List<Double>> readSphFile(String path) {
 		List<List<Double>> coeffs = new ArrayList<>();
-		for (String line : Files.readAllLines(path)) {
-			coeffs.add(Arrays.stream(line.trim().split(" ")).map(s -> Double.parseDouble(s)).collect(Collectors.toList()));
+		try {
+			for (String line : Files.readAllLines(Paths.get(path))) {
+				coeffs.add(Arrays.stream(line.trim().split(" ")).map(s -> Double.parseDouble(s)).collect(Collectors.toList()));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		return coeffs;
 	}

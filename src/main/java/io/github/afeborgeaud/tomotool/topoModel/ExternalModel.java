@@ -2,6 +2,7 @@ package io.github.afeborgeaud.tomotool.topoModel;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOError;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -45,8 +46,11 @@ public class ExternalModel implements Seismic3Dmodel {
 		rmin = 0.;
 		rmax = 6371.;
 		
-		coeffs = ReadUtils.readSphFile_specfem(modelPath);
-		LMAX = coeffs.size();
+		if (ReadUtils.isSphFile(modelPath)) coeffs = ReadUtils.readSphFile(modelPath);
+		else if (ReadUtils.isSphSpecfemFile(modelPath)) coeffs = ReadUtils.readSphFile_specfem(modelPath);
+		else throw new RuntimeException("File format not supported");
+		
+		LMAX = coeffs.size() - 1;
 		this.modelName = modelName;
 		
 		switch (mantleModelName.toLowerCase()) {

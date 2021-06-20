@@ -7,12 +7,13 @@ import io.github.afeborgeaud.tomotool.topoModel.S20RTS;
 import io.github.afeborgeaud.tomotool.topoModel.SEMUCBWM1;
 import io.github.afeborgeaud.tomotool.topoModel.Seismic3Dmodel;
 import io.github.afeborgeaud.tomotool.topoModel.TK10;
+import org.apache.commons.cli.*;
 
 public class Utils {
 	
-	public static Seismic3Dmodel parse3DModel(String modelName) {
+	public static Seismic3Dmodel parse3DModel(String modelName, String mantleModelName) {
 		Seismic3Dmodel seismic3Dmodel = null;
-		switch (modelName) {
+		switch (modelName.toLowerCase()) {
 		case "semucb":
 		case "semucbwm1":
 		case "semucb_wm1":
@@ -33,12 +34,16 @@ public class Utils {
 			break;
 		default:
 			try {
-				seismic3Dmodel = new ExternalModel(modelName, "custom", "s20rts");
+				seismic3Dmodel = new ExternalModel(modelName, "custom", mantleModelName);
 			} catch (Exception e) {
 				throw new RuntimeException("Error: 3D model " + modelName + " not implemented yet");
 			}
 		}
 		return seismic3Dmodel;
+	}
+	
+	public static Seismic3Dmodel parse3DModel(String modelName) {
+		return parse3DModel(modelName, "s20rts");
 	}
 	
 }

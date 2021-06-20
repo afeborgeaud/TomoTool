@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.cli.*;
 import org.apache.commons.math3.linear.ArrayRealVector;
 
 import edu.sc.seis.TauP.SphericalCoords;
@@ -40,83 +41,63 @@ import io.github.afeborgeaud.tomotool.utilities.Utils;
 public class Compute {
 
 	public static void main(String[] args) throws IOException {
-//		compute_ScS_differential();
+		Options options = new Options();
 		
-//		compute_geodynamics_models(false, true);
+		Option raypathInfoFileOpt = new Option("ri", "raypath-info", true, "path to a raypath information file");
+		raypathInfoFileOpt.setRequired(true);
+		options.addOption(raypathInfoFileOpt);
 		
-//		compute_geodynamics_models_diff(true, false, "SKKS", 20);
+		Option modelNameOpt = new Option("m", "model", true, "name of the mantle/topo model, or path to a custom model file");
+		modelNameOpt.setRequired(true);
+		options.addOption(modelNameOpt);
 		
-//		compute_geodynamics_models_diff(false, true, "SKKS", 4);
-//		compute_geodynamics_models_diff(false, true, "SKKS", 20);
-//		compute_geodynamics_models_diff(true, true, "SKKS", 4);
-//		compute_geodynamics_models_diff(true, true, "SKKS", 20);
-//		
-//		compute_geodynamics_models_diff(false, true, "ScS", 4);
-//		compute_geodynamics_models_diff(false, true, "ScS", 20);
-//		compute_geodynamics_models_diff(true, true, "ScS", 4);
-//		compute_geodynamics_models_diff(true, true, "ScS", 20);
+		Option phaseNameOpt = new Option("p", "phase", true, "seismic phase");
+		phaseNameOpt.setRequired(true);
+		options.addOption(phaseNameOpt);
 		
-//		compute_geodynamics_models_diff(false, true, "ScS");
-//		compute_geodynamics_models_diff(true, true, "ScS");
+		Option customModelNameOpt = new Option("n", "model-name", true, "name of the mantle/topo model (for custom models)");
+		customModelNameOpt.setRequired(false);
+		options.addOption(customModelNameOpt);
 		
-//		compute_geodynamics_models_diff(true, true, "SKKS");
-//		compute_geodynamics_models_diff(true, true, "ScS");
+		Option help = new Option("h", "help", false, "print this message");
+		options.addOption(help);
 		
-		if (args.length == 0)
-			compute_geodynamics_models_diff(true, false, "SKKS", 20);
-		else if (args.length == 3) {
-			Path raypathInformationPath = Paths.get(args[0]);
-			String threeDmodel = args[1].trim().toLowerCase();
-			String phaseName = args[2].trim();
-			
-			List<RaypathInformation> raypathInformations = RaypathInformation.readRaypathInformation(raypathInformationPath);
-			Seismic3Dmodel seismic3Dmodel = Utils.parse3DModel(threeDmodel.toLowerCase());
-			String refModelName = "prem";
-			
-			List<Measurement> measurements_mantle = compute_phase_from_raypathinfo(raypathInformations,
-					seismic3Dmodel, refModelName, phaseName, true, false);
-			List<Measurement> measurements_topo = compute_phase_from_raypathinfo(raypathInformations,
-					seismic3Dmodel, refModelName, phaseName, false, true);
-			
-			Path outpath_mantle = Paths.get("dt_" + threeDmodel + "_" + "mantle" + "_" + phaseName + ".txt");
-			Path outpath_topo = Paths.get("dt_" + threeDmodel + "_" + "topo" + "_" + phaseName + ".txt");
-			writeMeasurements(outpath_mantle, measurements_mantle, phaseName);
-			writeMeasurements(outpath_topo, measurements_topo, phaseName);
-		}
-//		else if (args.length == 4) {
-//			Path timewindowPath = Paths.get(args[0]);
-//			String threeDmodel = args[1].trim().toLowerCase();
-//			String phaseRef = args[2].trim();
-//			String phase = args[3].trim();
-//			
-//			if (!threeDmodel.equals("s20rts"))
-//				return;
-//			
-//			List<TimewindowInformation> timewindows = TimewindowInformationFile
-//					.read(timewindowPath).stream().collect(Collectors.toList());
-//			
-//			int nlmax = 4;
-//			S20RTS seismic3dmodel = new S20RTS(2);
-//			seismic3dmodel.filter(nlmax);
-//			compute_phase_differential(timewindows, seismic3dmodel, phaseRef, phase, false, true);
-//			compute_phase_differential(timewindows, seismic3dmodel, phaseRef, phase, true, false);
-//			
-//			seismic3dmodel = new S20RTS(-2);
-//			seismic3dmodel.filter(nlmax);
-//			compute_phase_differential(timewindows, seismic3dmodel, phaseRef, phase, false, true);
-//			compute_phase_differential(timewindows, seismic3dmodel, phaseRef, phase, true, false);
-//			
-//			seismic3dmodel = new S20RTS(4);
-//			seismic3dmodel.filter(nlmax);
-//			compute_phase_differential(timewindows, seismic3dmodel, phaseRef, phase, false, true);
-//			compute_phase_differential(timewindows, seismic3dmodel, phaseRef, phase, true, false);
-//			
-//			seismic3dmodel = new S20RTS(-4);
-//			seismic3dmodel.filter(nlmax);
-//			compute_phase_differential(timewindows, seismic3dmodel, phaseRef, phase, false, true);
-//			compute_phase_differential(timewindows, seismic3dmodel, phaseRef, phase, true, false);
-//		}
+		CommandLineParser parser = new DefaultParser();
+        HelpFormatter formatter = new HelpFormatter();
+        CommandLine cmd = null;
+
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+            formatter.printHelp("Compute", options);
+
+            System.exit(1);
+        }
+        
+		Path raypathInformationPath = Paths.get(cmd.getOptionValue("raypath-info"));
+		String threeDmodel = cmd.getOptionValue("model").trim();
+		String phaseName = cmd.getOptionValue("phase").trim();
+		String modelName = null;
 		
+		if (cmd.hasOption("model-name")) modelName = cmd.getOptionValue("model-name").trim();
+		
+		List<RaypathInformation> raypathInformations = RaypathInformation.readRaypathInformation(raypathInformationPath);
+		Seismic3Dmodel seismic3Dmodel = null;
+		String refModelName = "prem";
+		
+		if (modelName != null) seismic3Dmodel = Utils.parse3DModel(threeDmodel, modelName);
+		else seismic3Dmodel = Utils.parse3DModel(threeDmodel);
+		
+		List<Measurement> measurements_mantle = compute_phase_from_raypathinfo(raypathInformations,
+				seismic3Dmodel, refModelName, phaseName, true, false);
+		List<Measurement> measurements_topo = compute_phase_from_raypathinfo(raypathInformations,
+				seismic3Dmodel, refModelName, phaseName, false, true);
+		
+		Path outpath_mantle = Paths.get("dt_" + seismic3Dmodel.getName() + "_" + "mantle" + "_" + phaseName + ".txt");
+		Path outpath_topo = Paths.get("dt_" + seismic3Dmodel.getName() + "_" + "topo" + "_" + phaseName + ".txt");
+		writeMeasurements(outpath_mantle, measurements_mantle, phaseName);
+		writeMeasurements(outpath_topo, measurements_topo, phaseName);
 	}
 	
 	private static void writeMeasurements(Path outpath, List<Measurement> measurements, String phaseName) {
